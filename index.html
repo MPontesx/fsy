@@ -488,7 +488,7 @@ function isAdmin(){ return myAccessRank() >= 3; }
 
 function showAccountMenu(){
   const body = el('div');
-  body.innerHTML = <div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de você até você sair.</div>;
+  body.innerHTML = `<div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de você até você sair.</div>`;
   const swap = el('button','btn btn-outline btn-block','Trocar de usuário');
   swap.style.marginBottom = '8px';
   swap.onclick = ()=>{ showIdentityPicker(); };
@@ -511,11 +511,11 @@ function showIdentityPicker(){
     const list = el('div');
     state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
       const row = el('div','pick-row');
-      row.innerHTML = <div><div class="roster-name">${esc(u.name)}</div><div class="roster-role">${esc(u.manualRole)}</div></div><span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>;
+      row.innerHTML = `<div><div class="roster-name">${esc(u.name)}</div><div class="roster-role">${esc(u.manualRole)}</div></div><span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>`;
       row.onclick = ()=> selectIdentity(u);
       list.appendChild(row);
     });
-    body.innerHTML = <div class="helptext">Toque no seu nome para entrar. Se você ainda não está na lista, peça para o administrador te adicionar na aba Equipe.</div>;
+    body.innerHTML = `<div class="helptext">Toque no seu nome para entrar. Se você ainda não está na lista, peça para o administrador te adicionar na aba Equipe.</div>`;
     body.appendChild(list);
   }
   openSheet('Quem é você?', body, true);
@@ -535,7 +535,7 @@ function showIdentityPicker(){
 function selectIdentity(u){
   if(u.access==='admin' && u.pin){
     const body = el('div');
-    body.innerHTML = <div class="field"><label>PIN de administrador</label><input id="pinInput" inputmode="numeric" maxlength="4" placeholder="0000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>;
+    body.innerHTML = `<div class="field"><label>PIN de administrador</label><input id="pinInput" inputmode="numeric" maxlength="4" placeholder="0000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
     openSheet('Confirme seu PIN', body, true);
     $('#pinBtn').onclick = async ()=>{
       if($('#pinInput').value.trim() === u.pin){ closeSheet(); state.user = u; await rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!'); }
@@ -574,7 +574,7 @@ function openSheet(title, bodyNode, centered){
   ov.onclick = (e)=>{ if(e.target===ov) closeSheet(); };
   const sh = el('div','sheet');
   const head = el('div','sheet-head');
-  head.innerHTML = <h3>${esc(title)}</h3>;
+  head.innerHTML = `<h3>${esc(title)}</h3>`;
   const xbtn = el('button','x',ICONS.x); xbtn.onclick = closeSheet;
   head.appendChild(xbtn);
   const body = el('div','sheet-body');
@@ -592,9 +592,9 @@ function render(){
 
   // top bar
   const top = el('div','topbar');
-  top.innerHTML = <div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>;
+  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>`;
   const chip = el('div','user-chip');
-  chip.innerHTML = <span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>;
+  chip.innerHTML = `<span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>`;
   chip.onclick = state.user ? showAccountMenu : showIdentityPicker;
   top.appendChild(chip);
   app.appendChild(top);
@@ -626,7 +626,7 @@ function render(){
     ];
     tabs.forEach(t=>{
       const b = el('button','navbtn'+(state.tab===t.id?' active':''));
-      b.innerHTML = <span class="ic">${t.icon}</span>${t.label};
+      b.innerHTML = `<span class="ic">${t.icon}</span>${t.label}`;
       b.onclick = ()=>{ state.tab = t.id; render(); };
       nav.appendChild(b);
     });
@@ -673,7 +673,7 @@ function renderCronograma(){
   const day = state.schedule.days[state.day];
   const card = el('div','card');
   const head = el('div','day-header');
-  head.innerHTML = <h2 class="display">${esc(day.name)}</h2>${day.sub?<div class="dress">${esc(day.sub)}</div>:''}<div class="dress">${esc(day.dress)}</div>;
+  head.innerHTML = `<h2 class="display">${esc(day.name)}</h2>${day.sub?`<div class="dress">${esc(day.sub)}</div>`:''}<div class="dress">${esc(day.dress)}</div>`;
   card.appendChild(head);
 
   day.activities.forEach((a,idx)=>{
@@ -684,7 +684,7 @@ function renderCronograma(){
       <div class="act-time">${esc(a.time)}</div>
       <div class="act-main">
         <div class="act-title${a.done?' done':''}">${esc(a.title)}</div>
-        ${youAct ? <div class="act-you">Você: <b>${esc(youAct)}</b></div> : ''}
+        ${youAct ? `<div class="act-you">Você: <b>${esc(youAct)}</b></div>` : ''}
       </div>
       <div class="check${a.done?' checked':''}">${ICONS.check}</div>
     `;
@@ -695,14 +695,14 @@ function renderCronograma(){
     const detail = el('div','act-detail');
     detail.style.display = 'none';
     detail.innerHTML = `
-      ${a.desc ? <div class="act-desc">${esc(a.desc)}</div> : ''}
+      ${a.desc ? `<div class="act-desc">${esc(a.desc)}</div>` : ''}
       <div class="matrix">
         <div class="matrix-item"><span class="role">Consultor</span>${esc(a.roles.consultor)}</div>
         <div class="matrix-item"><span class="role">Coord. Assistente</span>${esc(a.roles.coordAssist)}</div>
         <div class="matrix-item"><span class="role">Coordenador</span>${esc(a.roles.coordenador)}</div>
         <div class="matrix-item"><span class="role">Casal Diretor</span>${esc(a.roles.casalDiretor)}</div>
       </div>
-      ${a.doneBy ? <div class="act-meta">Concluído por ${esc(a.doneBy)}</div> : ''}
+      ${a.doneBy ? `<div class="act-meta">Concluído por ${esc(a.doneBy)}</div>` : ''}
     `;
     // Somente o administrador pode editar o resumo/descrição da atividade.
     if(isAdmin()){
@@ -808,7 +808,7 @@ function renderNecessidades(){
 
   if(list.length===0){
     const e = el('div','empty');
-    e.innerHTML = <div class="ic">📋</div><div class="t">Nada por aqui</div><div class="s">Toque no botão + para registrar um pedido, problema, material necessário ou um relato do dia.</div>;
+    e.innerHTML = `<div class="ic">📋</div><div class="t">Nada por aqui</div><div class="s">Toque no botão + para registrar um pedido, problema, material necessário ou um relato do dia.</div>`;
     wrap.appendChild(e);
     return wrap;
   }
@@ -841,17 +841,17 @@ function openNewNeed(){
     <div class="field"><label>Descrição</label><textarea id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
     <div class="field"><label>Categoria</label>
       <div class="seg" id="nCat">
-        ${NEED_CATEGORIES.map((c,i)=><div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>).join('')}
+        ${NEED_CATEGORIES.map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>`).join('')}
       </div>
     </div>
     <div class="field"><label>Encaminhar para</label>
       <div class="seg" id="nAssign">
-        ${ASSIGN_TARGETS.map((a,i)=><div class="seg-opt${i===0?' active':''}" data-v="${a}">${a}</div>).join('')}
+        ${ASSIGN_TARGETS.map((a,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${a}">${a}</div>`).join('')}
       </div>
     </div>
     <div class="field" id="prioField"><label>Prioridade</label>
       <div class="seg" id="nPrio">
-        ${['baixa','media','alta','urgente'].map((c,i)=><div class="seg-opt${i===0?' active':''}" data-v="${c}">${PRIO_LABEL[c]}</div>).join('')}
+        ${['baixa','media','alta','urgente'].map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${PRIO_LABEL[c]}</div>`).join('')}
       </div>
     </div>
   `;
@@ -937,7 +937,7 @@ function openNeedDetail(id){
 /* ---------------- Equipe (roster + permissões) ---------------- */
 function renderEquipe(){
   const wrap = el('div');
-  wrap.appendChild(el('div','section-title', isAdmin() ? Equipe (${state.roster.users.length}) : 'Equipe'));
+  wrap.appendChild(el('div','section-title', isAdmin() ? `Equipe (${state.roster.users.length})` : 'Equipe'));
 
   if(isAdmin()){
     const addBtn = el('button','btn btn-outline btn-block','+ Adicionar membro da equipe');
@@ -972,7 +972,7 @@ function openAddMember(){
   body.innerHTML = `
     <div class="field"><label>Nome</label><input id="mName" placeholder="Nome completo"></div>
     <div class="field"><label>Função (manual FSY)</label>
-      <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=><div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>).join('')}</div>
+      <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="mAccess">
@@ -1014,11 +1014,11 @@ function openEditMember(id){
   body.innerHTML = `
     <div class="field"><label>Nome</label><input id="emName" value="${esc(u.name)}"></div>
     <div class="field"><label>Função (manual FSY)</label>
-      <div class="seg" id="emRole">${MANUAL_ROLES.map(r=><div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>).join('')}</div>
+      <div class="seg" id="emRole">${MANUAL_ROLES.map(r=>`<div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="emAccess">
-        ${['consultor','coordenacao','admin'].map(a=><div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>).join('')}
+        ${['consultor','coordenacao','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
     <div class="field" id="empinField" style="display:${u.access==='admin'?'block':'none'};"><label>PIN de administrador</label><input id="emPin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}"></div>
