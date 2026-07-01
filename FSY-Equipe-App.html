@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>FSY Equipe</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --ink:#181818;
+  --ink-soft:#3a3a3a;
+  --paper:#ffffff;
+  --soft:#f4f3ef;
+  --soft2:#ebe9e2;
+  --line:#e2e0d8;
+  --gold:#a9842f;
+  --gold-deep:#7c611f;
+  --red:#a3291f;
+  --green:#3f6b46;
+  --radius:14px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:'Inter',system-ui,sans-serif;
+  background:var(--soft);
+  color:var(--ink);
+  display:flex;
+  justify-content:center;
+}
+#app{
+  width:100%;
+  max-width:480px;
+  min-height:100vh;
+  background:var(--paper);
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.display{font-family:'Archivo Black','Inter',sans-serif; letter-spacing:-0.02em;}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  background:var(--ink);
+  color:#fff;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  position:sticky;
+  top:0;
+  z-index:30;
+}
+.brand{display:flex;align-items:center;gap:10px;}
+.badge-mark{
+  width:34px;height:34px;border-radius:8px;
+  background:linear-gradient(155deg,var(--gold),var(--gold-deep));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Archivo Black',sans-serif;font-size:12px;color:#1a1408;
+  flex-shrink:0;
+}
+.brand-text{display:flex;flex-direction:column;line-height:1.1;}
+.brand-text .t1{font-size:15px;font-weight:800;letter-spacing:0.01em;}
+.brand-text .t2{font-size:10px;color:#c8c4ba;letter-spacing:0.08em;text-transform:uppercase;}
+.user-chip{
+  display:flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,0.08);
+  border:1px solid rgba(255,255,255,0.15);
+  padding:6px 10px;border-radius:20px;
+  font-size:12px;cursor:pointer;
+  max-width:140px;
+}
+.user-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
+.user-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+
+/* ---------- Content ---------- */
+#content{flex:1;padding:16px 16px 90px 16px;overflow-y:auto;}
+.section-title{
+  font-size:11px;text-transform:uppercase;letter-spacing:0.1em;
+  color:#8a8676;font-weight:700;margin:18px 0 8px 2px;
+}
+.section-title:first-child{margin-top:0;}
+
+/* ---------- Bottom nav ---------- */
+.navbar{
+  position:sticky;bottom:0;
+  display:flex;
+  background:var(--ink);
+  border-top:1px solid #000;
+  z-index:30;
+}
+.navbtn{
+  flex:1;padding:10px 4px 12px 4px;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:#9a968a;background:none;border:none;font-family:inherit;
+  font-size:10.5px;letter-spacing:0.02em;cursor:pointer;
+}
+.navbtn.active{color:#fff;}
+.navbtn .ic{width:20px;height:20px;}
+.navbtn.active .ic svg{stroke:var(--gold);}
+.navbtn .ic svg{width:20px;height:20px;stroke:#9a968a;fill:none;stroke-width:1.8;}
+
+/* ---------- Buttons ---------- */
+.btn{
+  font-family:inherit;border:none;border-radius:10px;
+  padding:11px 16px;font-weight:700;font-size:13.5px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-primary{background:var(--ink);color:#fff;}
+.btn-gold{background:var(--gold);color:#1a1408;}
+.btn-outline{background:transparent;border:1.5px solid var(--ink);color:var(--ink);}
+.btn-ghost{background:var(--soft2);color:var(--ink-soft);}
+.btn-danger{background:#fbeae8;color:var(--red);}
+.btn-block{width:100%;}
+.btn-sm{padding:7px 12px;font-size:12px;border-radius:8px;}
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  margin-bottom:10px;
+  overflow:hidden;
+}
+.card-pad{padding:14px;}
+
+/* ---------- Day chips ---------- */
+.daychips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px 2px;}
+.daychip{
+  flex-shrink:0;
+  padding:9px 14px;border-radius:10px;
+  background:var(--soft2);color:var(--ink-soft);
+  font-weight:700;font-size:12.5px;cursor:pointer;
+  border:1.5px solid transparent;
+  white-space:nowrap;
+}
+.daychip.active{background:var(--ink);color:#fff;}
+
+.day-header{
+  background:var(--ink);color:#fff;border-radius:var(--radius) var(--radius) 0 0;
+  padding:16px;
+}
+.day-header h2{margin:0;font-size:26px;}
+.day-header .dress{
+  margin-top:4px;font-size:12px;color:#d8d4c8;font-style:italic;
+}
+
+/* ---------- Activity row ---------- */
+.activity{
+  border-bottom:1px solid var(--line);
+}
+.activity:last-child{border-bottom:none;}
+.act-head{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:13px 14px;cursor:pointer;
+}
+.act-time{
+  font-size:11.5px;font-weight:800;color:var(--gold-deep);
+  width:70px;flex-shrink:0;padding-top:2px;
+}
+.act-main{flex:1;min-width:0;}
+.act-title{font-size:14px;font-weight:700;line-height:1.3;}
+.act-title.done{text-decoration:line-through;color:#a8a59b;}
+.act-you{font-size:11px;color:#8a8676;margin-top:2px;}
+.act-you b{color:var(--ink-soft);}
+.check{
+  width:22px;height:22px;border-radius:6px;border:2px solid #c9c5b8;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  margin-top:1px;cursor:pointer;
+}
+.check.checked{background:var(--green);border-color:var(--green);}
+.check svg{width:13px;height:13px;stroke:#fff;stroke-width:3;display:none;}
+.check.checked svg{display:block;}
+
+.act-detail{padding:0 14px 16px 94px;}
+.matrix{
+  display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;
+}
+.matrix-item{
+  background:var(--soft);border-radius:8px;padding:7px 9px;font-size:11px;
+}
+.matrix-item .role{font-weight:700;color:var(--ink-soft);display:block;margin-bottom:1px;font-size:10.5px;}
+.act-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:8px;}
+.act-meta{font-size:10.5px;color:#a39f92;margin-top:6px;}
+
+/* ---------- Needs ---------- */
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;}
+.fchip{
+  flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:700;
+  background:var(--soft2);color:var(--ink-soft);cursor:pointer;border:1.5px solid transparent;
+}
+.fchip.active{background:var(--ink);color:#fff;}
+
+.need-card{padding:14px;cursor:pointer;}
+.need-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+.need-title{font-weight:700;font-size:14px;}
+.tag{
+  font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;
+  padding:3px 7px;border-radius:6px;white-space:nowrap;
+}
+.tag-aberto{background:#fbeae8;color:var(--red);}
+.tag-andamento{background:#fbf2dd;color:var(--gold-deep);}
+.tag-concluido{background:#e7f1e8;color:var(--green);}
+.prio-urgente{color:var(--red);}
+.prio-alta{color:var(--gold-deep);}
+.need-desc{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45;}
+.need-meta{font-size:10.5px;color:#a39f92;margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;}
+
+.fab{
+  position:absolute;right:16px;bottom:84px;z-index:25;
+  width:52px;height:52px;border-radius:50%;
+  background:var(--gold);color:#1a1408;border:none;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 16px rgba(0,0,0,0.25);cursor:pointer;
+}
+.fab svg{width:24px;height:24px;stroke:#1a1408;stroke-width:2.3;fill:none;}
+
+/* ---------- Forms ---------- */
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:9px;
+  font-family:inherit;font-size:13.5px;background:var(--paper);color:var(--ink);
+}
+.field textarea{resize:vertical;min-height:70px;}
+.seg{display:flex;gap:6px;flex-wrap:wrap;}
+.seg-opt{
+  padding:7px 12px;border-radius:8px;background:var(--soft2);font-size:12px;font-weight:700;
+  color:var(--ink-soft);cursor:pointer;border:1.5px solid transparent;
+}
+.seg-opt.active{background:var(--ink);color:#fff;}
+
+/* ---------- Modal / sheet ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(20,18,12,0.55);
+  display:flex;align-items:flex-end;justify-content:center;z-index:100;
+}
+.overlay.center{align-items:center;padding:20px;}
+.sheet{
+  width:100%;max-width:480px;background:var(--paper);
+  border-radius:18px 18px 0 0;max-height:88vh;overflow-y:auto;
+  animation:up .18s ease-out;
+}
+.overlay.center .sheet{border-radius:16px;max-height:85vh;}
+@keyframes up{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.sheet-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 16px 10px 16px;position:sticky;top:0;background:var(--paper);
+}
+.sheet-head h3{margin:0;font-size:17px;}
+.sheet-body{padding:0 16px 22px 16px;}
+.x{
+  width:30px;height:30px;border-radius:50%;background:var(--soft2);border:none;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;
+}
+.x svg{width:14px;height:14px;stroke:var(--ink-soft);stroke-width:2.4;}
+
+.empty{text-align:center;padding:50px 20px;color:#a39f92;}
+.empty .ic{font-size:34px;margin-bottom:8px;}
+.empty .t{font-weight:700;color:var(--ink-soft);font-size:14px;margin-bottom:4px;}
+.empty .s{font-size:12px;}
+
+.roster-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);}
+.roster-row:last-child{border-bottom:none;}
+.roster-name{font-weight:700;font-size:13.5px;}
+.roster-role{font-size:11px;color:#a39f92;margin-top:1px;}
+.lvl-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;}
+.lvl-admin{background:#f1e3c9;color:var(--gold-deep);}
+.lvl-coordenacao{background:#e2e8e3;color:var(--green);}
+.lvl-consultor{background:var(--soft2);color:var(--ink-soft);}
+
+.toast{
+  position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:#fff;padding:10px 18px;border-radius:30px;
+  font-size:12.5px;font-weight:600;z-index:200;opacity:0;transition:opacity .25s;
+  pointer-events:none;
+}
+.toast.show{opacity:1;}
+
+.pick-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 14px;border-bottom:1px solid var(--line);cursor:pointer;
+}
+.pick-row:active{background:var(--soft);}
+.helptext{font-size:11.5px;color:#a39f92;margin:-4px 0 14px 2px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   FSY EQUIPE — app de coordenação de staff para acampamento
+   Dados compartilhados via window.storage (shared=true)
+   ============================================================ */
+
+const ACCESS = {
+  admin:        {label:'Administrador', rank:3},
+  coordenacao:  {label:'Coordenação',    rank:2},
+  consultor:    {label:'Consultor',      rank:1}
+};
+const MANUAL_ROLES = ['Consultor','Coordenador Assistente','Coordenador','Casal Diretor da Sessão'];
+
+let state = {
+  user:null,           // {id,name,manualRole,access}
+  roster:{users:[]},
+  needs:[],
+  schedule:null,
+  tab:'cronograma',
+  day:0,
+  needFilter:'todos',
+  loaded:false
+};
+
+const $ = sel => document.querySelector(sel);
+const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; };
+const uid = () => Math.random().toString(36).slice(2,10);
+const esc = s => (s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(window._tt); window._tt = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+/* ---------------- Default schedule (from Manual da Equipe FSY 2026, pgs 5-10) ---------------- */
+function defaultSchedule(){
+  const R = (c,ca,co,cd) => ({consultor:c, coordAssist:ca, coordenador:co, casalDiretor:cd});
+  return { days: [
+    { id:'d0', name:'Dia Zero', sub:'Dia antes do início da conferência', dress:'Roupa casual', activities:[
+      {time:'A definir', title:'Visita às instalações/locais', roles:R('Participar','Participar','Liderar','Participar, se desejar'), desc:'Familiarize-se com o local e as instalações para saber direcionar os participantes. Inclui áreas reservadas, alojamentos, refeitório, campos e áreas de tempo livre.'},
+      {time:'A definir', title:'Orientação para os consultores', roles:R('Participar','—','Dirigir','—'), desc:'Saiba mais sobre seu papel e responsabilidades como consultor na conferência FSY. Chegue no horário e faça anotações.'},
+      {time:'19h–20h', title:'Mensagem do casal diretor da sessão', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Reunião obrigatória para toda a equipe. Recebimento de aperfeiçoamento espiritual em preparação para a sessão. Não se atrase e faça anotações.'},
+      {time:'20h15–21h15', title:'Reuniões CA e consultores / Consultor e adjunto', roles:R('Participar','Participar','Participar','Participar'), desc:'Grupo de debate de coordenadores assistentes e consultores: fortaleça o relacionamento com sua equipe, defina expectativas e metas da semana. Planejamento e entrevistas com o(s) consultor(es) adjunto(s): apresentem-se, troquem contatos, definam local de encontro da companhia e combinem estilos de ensino.'},
+      {time:'21h20–21h50', title:'Reunião dupla de Coordenadores e Coordenadores Assistentes', roles:R('—','Participar','Dirigir','—'), desc:''}
+    ]},
+    { id:'d1', name:'1º Dia', sub:'Chegada e início da sessão', dress:'Camiseta da Equipe FSY', activities:[
+      {time:'7h30–8h20', title:'Desjejum da equipe', roles:R('Participar','Participar','Participar','Participar')},
+      {time:'8h–8h20', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('—','Participar','Dirigir','—')},
+      {time:'8h30–9h15', title:'Reunião administrativa', roles:R('Participar','Participar','Dirigir','Compartilhar mensagem de 5 min')},
+      {time:'9h15–10h', title:'Planejamento do consultor adjunto', roles:R('Dirigir','—','—','—')},
+      {time:'9h15–10h45', title:'Distribuição de materiais e ensaio da orientação', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar, se desejar')},
+      {time:'11h–13h', title:'Check-in', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar')},
+      {time:'13h15–14h', title:'Conheça seu consultor', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar')},
+      {time:'14h15–15h25', title:'Conheça sua companhia', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar')},
+      {time:'15h40–16h25', title:'Orientação', roles:R('Participar','Auxiliar','Dirigir','Auxiliar')},
+      {time:'16h30–16h50', title:'Tempo livre', roles:R('Participar','Participar','Dirigir','Participar, se desejar')},
+      {time:'17h–17h50', title:'Brincadeiras da noite familiar', roles:R('Dirigir','Participar','Participar','Participar, se desejar')},
+      {time:'18h–18h50', title:'Aula da noite familiar', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'19h–20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h15–22h', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
+      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
+      {time:'22h20–22h50', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('Supervisionar','Auxiliar','Auxiliar','Participar, se desejar')},
+      {time:'23h', title:'Staff se recolher', roles:R('—','Supervisionar','Supervisionar','Supervisionar')}
+    ]},
+    { id:'d2', name:'2º Dia', sub:'', dress:'Roupa de domingo', activities:[
+      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
+      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h30–10h30', title:'Reunião Sacramental', roles:R('Participar','Supervisionar','Dirigir','Supervisionar')},
+      {time:'10h40–11h35', title:'Escola dominical "Vem, e segue-Me"', roles:R('Ensinar','Participar','Participar','Participar')},
+      {time:'11h45–12h45', title:'Tempo disponibilizado para o family search', roles:R('Participar','Supervisionar, se designado','Supervisionar','Ensinar')},
+      {time:'13h–14h30', title:'Almoço/ensaio do programa musical', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'14h30–15h30', title:'Compartilhar o Evangelho', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
+      {time:'15h40–16h40', title:'Tempo livre', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
+      {time:'16h50–17h50', title:'Força dos jovens', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'18h–18h50', title:'Devocional com setenta/pres. de estaca', roles:R('Participar','Supervisionar, se designado','Dirigir','Participar')},
+      {time:'19h–20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h20–22h', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
+      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Supervisionar','Supervisionar','—')},
+      {time:'22h20–22h50', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se quiser')},
+      {time:'23h', title:'Staff deve se recolher', roles:R('Participar','Supervisionar','Supervisionar','Supervisionar')}
+    ]},
+    { id:'d3', name:'3º Dia', sub:'', dress:'Camiseta da Equipe FSY', activities:[
+      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
+      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h25–10h15', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'10h30–11h', title:'Preparação de faixas e gritos de guerra', roles:R('Participar','Dirigir','Ajudar, se necessário','Participar, se desejar')},
+      {time:'11h10–12h20', title:'Manhã de jogos e gritos de guerra', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'12h30–13h50', title:'Almoço / Ensaio do programa musical / Testes para o show de variedades', roles:R('Participar / Ajudar, se designado','Supervisionar, se designado','Participar','Participar, se desejar'), desc:'Três atividades ocorrendo em paralelo nesse intervalo: almoço, ensaio do programa musical e testes para o show de variedades.'},
+      {time:'14h–14h50', title:'Serão Vespertino do casal diretor — "Educação e autossuficiência"', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'15h–15h50', title:'Atividade Viver o Evangelho', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'16h–16h40', title:'FSY Humano / Normas de etiqueta ao dançar (preparar-se para o baile)', roles:R('Participar / Dirigir','Ajudar, se designado','Dirigir','Participar'), desc:'Duas atividades em paralelo: "FSY Humano" e orientações de etiqueta para o baile.'},
+      {time:'18h–19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'19h–21h', title:'Baile + Lanche', roles:R('Ajudar, se designado','Ajudar, se designado','Dirigir','Participar')},
+      {time:'21h15–21h45', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h45–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
+      {time:'22h30', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
+      {time:'22h40–23h', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se desejar')},
+      {time:'23h', title:'Staff deve se recolher', roles:R('—','—','Supervisionar','Supervisionar')}
+    ]},
+    { id:'d4', name:'4º Dia', sub:'', dress:'Camiseta da Equipe FSY e Roupa de domingo', activities:[
+      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
+      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h25–9h45', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'10h–11h10', title:'Ensaio Geral do Show de Variedades / Tempo livre p/ os demais', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar, se desejar','—')},
+      {time:'11h20–11h40', title:'Show de variedades', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar','Participar')},
+      {time:'12h50–14h', title:'Almoço', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'14h–15h', title:'Serão Vespertino do casal diretor (rapazes) / Atividade "A Família" (moças)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Atividades simultâneas e separadas por gênero: rapazes com o casal diretor, moças na atividade "A Família: Proclamação ao Mundo".'},
+      {time:'15h20–16h20', title:'Serão Vespertino do casal diretor (moças) / Atividade "A Família" (rapazes)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Inversão dos grupos do horário anterior.'},
+      {time:'15h30–17h50', title:'Tempo livre dos participantes / Ensaio Geral e final do Programa Musical', roles:R('Ajudar, se designado','Dirigir ou ajudar, se designado','Participar, se possível','Participar, se possível')},
+      {time:'18h–19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'19h10–20h20', title:'Programa musical e devocional do casal diretor', roles:R('Participar','Supervisionar, se designado','Dirigir','Ensinar')},
+      {time:'20h30–21h30', title:'Convite à reverência para prestar testemunho e Reunião de testemunhos', roles:R('Dirigir','Participar, se possível','Participar, se possível','Participar, se possível')},
+      {time:'21h40–22h', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'22h–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')}
+    ]},
+    { id:'d5', name:'5º Dia', sub:'Encerramento e saída', dress:'Camiseta da Equipe FSY', activities:[
+      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
+      {time:'8h20–9h20', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h30–10h10', title:'Atividade "Conecte-se"', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'10h25–10h40', title:'Apresentação de slides', roles:R('Participar','Ajudar ou dirigir, se designado','Participar','Participar')},
+      {time:'10h40–11h40', title:'Devocional "O que vou levar para casa"', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'11h15–12h30', title:'Refletir e Analisar em companhia', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'12h30–13h40', title:'Almoço e arrumar as malas', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'13h30', title:'Saída dos participantes', roles:R('Participar','Supervisionar, se designado','Supervisionar','—')}
+    ]}
+  ]};
+}
+
+/* ---------------- Storage ---------------- */
+async function loadAll(){
+  try{
+    const r = await window.storage.get('roster', true);
+    state.roster = r ? JSON.parse(r.value) : {users:[]};
+  }catch(e){ state.roster = {users:[]}; }
+
+  try{
+    const n = await window.storage.get('needs', true);
+    state.needs = n ? JSON.parse(n.value) : [];
+  }catch(e){ state.needs = []; }
+
+  try{
+    const s = await window.storage.get('schedule', true);
+    state.schedule = s ? JSON.parse(s.value) : defaultSchedule();
+    if(!s){ await window.storage.set('schedule', JSON.stringify(state.schedule), true); }
+  }catch(e){ state.schedule = defaultSchedule(); }
+
+  state.loaded = true;
+}
+async function saveRoster(){ try{ await window.storage.set('roster', JSON.stringify(state.roster), true); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+async function saveNeeds(){ try{ await window.storage.set('needs', JSON.stringify(state.needs), true); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+async function saveSchedule(){ try{ await window.storage.set('schedule', JSON.stringify(state.schedule), true); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+
+async function refreshQuiet(){
+  try{
+    const n = await window.storage.get('needs', true);
+    if(n) state.needs = JSON.parse(n.value);
+    const s = await window.storage.get('schedule', true);
+    if(s) state.schedule = JSON.parse(s.value);
+    const r = await window.storage.get('roster', true);
+    if(r) state.roster = JSON.parse(r.value);
+    render();
+  }catch(e){ /* silent */ }
+}
+
+/* ---------------- Icons ---------------- */
+const ICONS = {
+  calendar:'<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><line x1="16" y1="3" x2="16" y2="7"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  list:'<svg viewBox="0 0 24 24"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.5" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4.5" cy="18" r="1.2" fill="currentColor" stroke="none"/></svg>',
+  users:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+  x:'<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  plus:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+};
+
+/* ---------------- Identity ---------------- */
+function myAccessRank(){ return state.user ? ACCESS[state.user.access].rank : 0; }
+function canManage(){ return myAccessRank() >= 2; } // coordenacao ou admin
+function isAdmin(){ return myAccessRank() >= 3; }
+
+function showAccountMenu(){
+  const body = el('div');
+  body.innerHTML = `<div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de você até você sair.</div>`;
+  const swap = el('button','btn btn-outline btn-block','Trocar de usuário');
+  swap.style.marginBottom = '8px';
+  swap.onclick = ()=>{ showIdentityPicker(); };
+  const out = el('button','btn btn-danger btn-block','Sair deste aparelho');
+  out.onclick = async ()=>{ await forgetIdentity(); state.user=null; closeSheet(); render(); toast('Você saiu'); };
+  body.appendChild(swap); body.appendChild(out);
+  openSheet('Sua conta', body, true);
+}
+function showIdentityPicker(){
+  const isFirstRun = state.roster.users.length === 0;
+  const body = document.createElement('div');
+  if(isFirstRun){
+    body.innerHTML = `
+      <div class="helptext">Ninguém configurado ainda. Crie a conta de administrador para começar — você poderá adicionar o resto da equipe e definir permissões depois.</div>
+      <div class="field"><label>Seu nome</label><input id="setupName" placeholder="Ex: Ednilson Godoy"></div>
+      <div class="field"><label>Crie um PIN de administrador (4 dígitos)</label><input id="setupPin" inputmode="numeric" maxlength="4" placeholder="0000"></div>
+      <button class="btn btn-gold btn-block" id="setupBtn">Criar conta de administrador</button>
+    `;
+  } else {
+    const list = el('div');
+    state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
+      const row = el('div','pick-row');
+      row.innerHTML = `<div><div class="roster-name">${esc(u.name)}</div><div class="roster-role">${esc(u.manualRole)}</div></div><span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>`;
+      row.onclick = ()=> selectIdentity(u);
+      list.appendChild(row);
+    });
+    body.innerHTML = `<div class="helptext">Toque no seu nome para entrar. Se você ainda não está na lista, peça para o administrador te adicionar na aba Equipe.</div>`;
+    body.appendChild(list);
+  }
+  openSheet('Quem é você?', body, true);
+  if(isFirstRun){
+    $('#setupBtn').onclick = async ()=>{
+      const name = $('#setupName').value.trim();
+      const pin = $('#setupPin').value.trim();
+      if(!name){ toast('Digite seu nome'); return; }
+      if(!/^\d{4}$/.test(pin)){ toast('PIN deve ter 4 dígitos'); return; }
+      const u = {id:uid(), name, manualRole:'Casal Diretor da Sessão', access:'admin', pin};
+      state.roster.users.push(u);
+      await saveRoster();
+      selectIdentity(u);
+    };
+  }
+}
+function selectIdentity(u){
+  if(u.access==='admin' && u.pin){
+    const body = el('div');
+    body.innerHTML = `<div class="field"><label>PIN de administrador</label><input id="pinInput" inputmode="numeric" maxlength="4" placeholder="0000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
+    openSheet('Confirme seu PIN', body, true);
+    $('#pinBtn').onclick = async ()=>{
+      if($('#pinInput').value.trim() === u.pin){ closeSheet(); state.user = u; await rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!'); }
+      else toast('PIN incorreto');
+    };
+  } else {
+    closeSheet(); state.user = u; rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!');
+  }
+}
+
+/* ---------------- Lembrar identidade neste aparelho (storage pessoal) ----------------
+   shared=false => cada pessoa que abre o app tem sua própria gaveta de armazenamento.
+   Por isso dá pra guardar "quem sou eu" aqui sem misturar com os dados dos outros 59. */
+async function rememberIdentity(u){
+  try{ await window.storage.set('myIdentity', JSON.stringify({id:u.id}), false); }catch(e){ /* sem problema se falhar */ }
+}
+async function forgetIdentity(){
+  try{ await window.storage.delete('myIdentity', false); }catch(e){ /* já não existia */ }
+}
+async function tryAutoLogin(){
+  try{
+    const saved = await window.storage.get('myIdentity', false);
+    if(!saved) return false;
+    const { id } = JSON.parse(saved.value);
+    const u = state.roster.users.find(x=>x.id===id);
+    if(u){ state.user = u; return true; }
+  }catch(e){ /* nada salvo ainda, ou erro de leitura — segue pro login normal */ }
+  return false;
+}
+
+/* ---------------- Sheet helper ---------------- */
+function openSheet(title, bodyNode, centered){
+  closeSheet();
+  const ov = el('div', 'overlay'+(centered?' center':''));
+  ov.id = 'activeOverlay';
+  ov.onclick = (e)=>{ if(e.target===ov) closeSheet(); };
+  const sh = el('div','sheet');
+  const head = el('div','sheet-head');
+  head.innerHTML = `<h3>${esc(title)}</h3>`;
+  const xbtn = el('button','x',ICONS.x); xbtn.onclick = closeSheet;
+  head.appendChild(xbtn);
+  const body = el('div','sheet-body');
+  body.appendChild(bodyNode);
+  sh.appendChild(head); sh.appendChild(body);
+  ov.appendChild(sh);
+  document.body.appendChild(ov);
+}
+function closeSheet(){ const o = document.getElementById('activeOverlay'); if(o) o.remove(); }
+
+/* ---------------- Render: shell ---------------- */
+function render(){
+  const app = $('#app');
+  app.innerHTML = '';
+
+  // top bar
+  const top = el('div','topbar');
+  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>`;
+  const chip = el('div','user-chip');
+  chip.innerHTML = `<span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>`;
+  chip.onclick = state.user ? showAccountMenu : showIdentityPicker;
+  top.appendChild(chip);
+  app.appendChild(top);
+
+  const content = el('div'); content.id = 'content';
+  app.appendChild(content);
+
+  if(!state.user){
+    content.appendChild(renderWelcome());
+  } else {
+    if(state.tab==='cronograma') content.appendChild(renderCronograma());
+    if(state.tab==='necessidades') content.appendChild(renderNecessidades());
+    if(state.tab==='equipe') content.appendChild(renderEquipe());
+
+    if(state.tab==='necessidades'){
+      const fab = el('button','fab',ICONS.plus);
+      fab.onclick = openNewNeed;
+      app.appendChild(fab);
+    }
+  }
+
+  // bottom nav
+  if(state.user){
+    const nav = el('div','navbar');
+    const tabs = [
+      {id:'cronograma', label:'Cronograma', icon:ICONS.calendar},
+      {id:'necessidades', label:'Necessidades', icon:ICONS.list},
+      {id:'equipe', label:'Equipe', icon:ICONS.users}
+    ];
+    tabs.forEach(t=>{
+      const b = el('button','navbtn'+(state.tab===t.id?' active':''));
+      b.innerHTML = `<span class="ic">${t.icon}</span>${t.label}`;
+      b.onclick = ()=>{ state.tab = t.id; render(); };
+      nav.appendChild(b);
+    });
+    app.appendChild(nav);
+  }
+}
+
+function renderWelcome(){
+  const w = el('div');
+  w.innerHTML = `
+    <div style="text-align:center;padding:40px 10px 10px 10px;">
+      <div class="badge-mark" style="width:56px;height:56px;font-size:16px;margin:0 auto 18px auto;">FSY</div>
+      <div class="display" style="font-size:22px;margin-bottom:8px;">Bem-vindo(a)</div>
+      <div style="font-size:13px;color:#8a8676;line-height:1.6;max-width:300px;margin:0 auto 26px auto;">
+        Ferramenta da equipe de consultores e coordenadores para acompanhar o cronograma da sessão e centralizar pedidos e necessidades durante o acampamento.
+      </div>
+    </div>`;
+  const btn = el('button','btn btn-gold btn-block','Identificar-se');
+  btn.onclick = showIdentityPicker;
+  w.appendChild(btn);
+  return w;
+}
+
+/* ---------------- Cronograma ---------------- */
+function youAction(roles){
+  if(!state.user) return null;
+  const map = {'Consultor':'consultor','Coordenador Assistente':'coordAssist','Coordenador':'coordenador','Casal Diretor da Sessão':'casalDiretor'};
+  const key = map[state.user.manualRole];
+  return key ? roles[key] : null;
+}
+
+function renderCronograma(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title','Programação da sessão'));
+
+  const chips = el('div','daychips');
+  state.schedule.days.forEach((d,i)=>{
+    const c = el('div','daychip'+(state.day===i?' active':''), d.name);
+    c.onclick = ()=>{ state.day = i; render(); };
+    chips.appendChild(c);
+  });
+  wrap.appendChild(chips);
+
+  const day = state.schedule.days[state.day];
+  const card = el('div','card');
+  const head = el('div','day-header');
+  head.innerHTML = `<h2 class="display">${esc(day.name)}</h2>${day.sub?`<div class="dress">${esc(day.sub)}</div>`:''}<div class="dress">${esc(day.dress)}</div>`;
+  card.appendChild(head);
+
+  day.activities.forEach((a,idx)=>{
+    const act = el('div','activity');
+    const youAct = youAction(a.roles);
+    const head2 = el('div','act-head');
+    head2.innerHTML = `
+      <div class="act-time">${esc(a.time)}</div>
+      <div class="act-main">
+        <div class="act-title${a.done?' done':''}">${esc(a.title)}</div>
+        ${youAct ? `<div class="act-you">Você: <b>${esc(youAct)}</b></div>` : ''}
+      </div>
+      <div class="check${a.done?' checked':''}">${ICONS.check}</div>
+    `;
+    const checkEl = head2.querySelector('.check');
+    checkEl.onclick = (e)=>{ e.stopPropagation(); toggleDone(state.day, idx); };
+    head2.onclick = ()=>{ detail.style.display = detail.style.display==='none' ? 'block' : 'none'; };
+
+    const detail = el('div','act-detail');
+    detail.style.display = 'none';
+    detail.innerHTML = `
+      ${a.desc ? `<div class="act-desc">${esc(a.desc)}</div>` : ''}
+      <div class="matrix">
+        <div class="matrix-item"><span class="role">Consultor</span>${esc(a.roles.consultor)}</div>
+        <div class="matrix-item"><span class="role">Coord. Assistente</span>${esc(a.roles.coordAssist)}</div>
+        <div class="matrix-item"><span class="role">Coordenador</span>${esc(a.roles.coordenador)}</div>
+        <div class="matrix-item"><span class="role">Casal Diretor</span>${esc(a.roles.casalDiretor)}</div>
+      </div>
+      ${a.doneBy ? `<div class="act-meta">Concluído por ${esc(a.doneBy)}</div>` : ''}
+    `;
+    if(canManage()){
+      const editBtn = el('button','btn btn-ghost btn-sm','Editar atividade');
+      editBtn.style.marginTop = '4px';
+      editBtn.onclick = (e)=>{ e.stopPropagation(); openEditActivity(state.day, idx); };
+      detail.appendChild(editBtn);
+    }
+    act.appendChild(head2); act.appendChild(detail);
+    card.appendChild(act);
+  });
+
+  if(canManage()){
+    const addRow = el('div','card-pad');
+    const addBtn = el('button','btn btn-outline btn-block','+ Adicionar atividade neste dia');
+    addBtn.onclick = ()=> openEditActivity(state.day, null);
+    addRow.appendChild(addBtn);
+    card.appendChild(addRow);
+  }
+
+  wrap.appendChild(card);
+  return wrap;
+}
+
+async function toggleDone(dayIdx, actIdx){
+  const a = state.schedule.days[dayIdx].activities[actIdx];
+  a.done = !a.done;
+  a.doneBy = a.done ? state.user.name : null;
+  await saveSchedule();
+  render();
+}
+
+function openEditActivity(dayIdx, actIdx){
+  const isNew = actIdx===null;
+  const a = isNew ? {time:'',title:'',desc:'',roles:{consultor:'',coordAssist:'',coordenador:'',casalDiretor:''},done:false} : state.schedule.days[dayIdx].activities[actIdx];
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Horário</label><input id="eTime" value="${esc(a.time)}" placeholder="Ex: 9h–10h"></div>
+    <div class="field"><label>Atividade</label><input id="eTitle" value="${esc(a.title)}" placeholder="Nome da atividade"></div>
+    <div class="field"><label>Descrição / o que será usado</label><textarea id="eDesc" placeholder="Detalhes da atividade, materiais necessários...">${esc(a.desc||'')}</textarea></div>
+    <div class="field"><label>Consultor</label><input id="eR1" value="${esc(a.roles.consultor)}"></div>
+    <div class="field"><label>Coordenador Assistente</label><input id="eR2" value="${esc(a.roles.coordAssist)}"></div>
+    <div class="field"><label>Coordenador</label><input id="eR3" value="${esc(a.roles.coordenador)}"></div>
+    <div class="field"><label>Casal Diretor da Sessão</label><input id="eR4" value="${esc(a.roles.casalDiretor)}"></div>
+  `;
+  const btnRow = el('div'); btnRow.style.display='flex'; btnRow.style.gap='8px'; btnRow.style.marginTop='6px';
+  const save = el('button','btn btn-gold','Salvar'); save.style.flex='1';
+  btnRow.appendChild(save);
+  if(!isNew){
+    const del = el('button','btn btn-danger','Excluir');
+    del.onclick = async ()=>{
+      state.schedule.days[dayIdx].activities.splice(actIdx,1);
+      await saveSchedule(); closeSheet(); render(); toast('Atividade removida');
+    };
+    btnRow.appendChild(del);
+  }
+  body.appendChild(btnRow);
+  openSheet(isNew?'Nova atividade':'Editar atividade', body, true);
+
+  save.onclick = async ()=>{
+    const newA = {
+      time:$('#eTime').value.trim(), title:$('#eTitle').value.trim(), desc:$('#eDesc').value.trim(),
+      roles:{consultor:$('#eR1').value.trim(),coordAssist:$('#eR2').value.trim(),coordenador:$('#eR3').value.trim(),casalDiretor:$('#eR4').value.trim()},
+      done:a.done||false, doneBy:a.doneBy||null
+    };
+    if(!newA.title){ toast('Digite o nome da atividade'); return; }
+    if(isNew) state.schedule.days[dayIdx].activities.push(newA);
+    else state.schedule.days[dayIdx].activities[actIdx] = newA;
+    await saveSchedule(); closeSheet(); render(); toast('Atividade salva');
+  };
+}
+
+/* ---------------- Necessidades (helpdesk) ---------------- */
+const STATUS_LABEL = {aberto:'Aberto', andamento:'Em andamento', concluido:'Concluído'};
+const PRIO_LABEL = {baixa:'Baixa',media:'Média',alta:'Alta',urgente:'Urgente'};
+
+function renderNecessidades(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title','Necessidades e problemas'));
+
+  const filters = el('div','filter-row');
+  ['todos','aberto','andamento','concluido'].forEach(f=>{
+    const c = el('div','fchip'+(state.needFilter===f?' active':''), f==='todos'?'Todos':STATUS_LABEL[f]);
+    c.onclick = ()=>{ state.needFilter=f; render(); };
+    filters.appendChild(c);
+  });
+  wrap.appendChild(filters);
+
+  let list = state.needs.slice().sort((a,b)=> b.createdAt - a.createdAt);
+  if(state.needFilter!=='todos') list = list.filter(n=>n.status===state.needFilter);
+
+  if(list.length===0){
+    const e = el('div','empty');
+    e.innerHTML = `<div class="ic">📋</div><div class="t">Nada por aqui</div><div class="s">Toque no botão + para registrar um pedido, problema ou material necessário.</div>`;
+    wrap.appendChild(e);
+    return wrap;
+  }
+
+  list.forEach(n=>{
+    const card = el('div','card need-card');
+    card.innerHTML = `
+      <div class="need-top">
+        <div class="need-title">${esc(n.title)}</div>
+        <span class="tag tag-${n.status}">${STATUS_LABEL[n.status]}</span>
+      </div>
+      <div class="need-desc">${esc(n.desc)}</div>
+      <div class="need-meta">
+        <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
+        <span>${esc(n.category)}</span>
+        <span>${esc(n.createdByName)}</span>
+      </div>
+    `;
+    card.onclick = ()=> openNeedDetail(n.id);
+    wrap.appendChild(card);
+  });
+  return wrap;
+}
+
+function openNewNeed(){
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Título</label><input id="nTitle" placeholder="Ex: Falta água no refeitório"></div>
+    <div class="field"><label>Descrição</label><textarea id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
+    <div class="field"><label>Categoria</label>
+      <div class="seg" id="nCat">
+        ${['Material','Problema','Outro'].map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field"><label>Prioridade</label>
+      <div class="seg" id="nPrio">
+        ${['baixa','media','alta','urgente'].map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${PRIO_LABEL[c]}</div>`).join('')}
+      </div>
+    </div>
+  `;
+  body.querySelectorAll('#nCat .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#nCat .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+  body.querySelectorAll('#nPrio .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#nPrio .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+
+  const save = el('button','btn btn-gold btn-block','Registrar');
+  save.style.marginTop = '6px';
+  body.appendChild(save);
+  openSheet('Nova necessidade', body, true);
+
+  save.onclick = async ()=>{
+    const title = $('#nTitle').value.trim();
+    if(!title){ toast('Digite um título'); return; }
+    const cat = body.querySelector('#nCat .seg-opt.active').dataset.v;
+    const prio = body.querySelector('#nPrio .seg-opt.active').dataset.v;
+    state.needs.push({
+      id:uid(), title, desc:$('#nDesc').value.trim(), category:cat, priority:prio,
+      status:'aberto', createdBy:state.user.id, createdByName:state.user.name,
+      assignedTo:null, createdAt:Date.now(), updatedAt:Date.now()
+    });
+    await saveNeeds(); closeSheet(); render(); toast('Necessidade registrada');
+  };
+}
+
+function openNeedDetail(id){
+  const n = state.needs.find(x=>x.id===id);
+  if(!n) return;
+  const body = el('div');
+  body.innerHTML = `
+    <div class="need-desc" style="margin-bottom:14px;">${esc(n.desc)||'<i>Sem descrição</i>'}</div>
+    <div class="need-meta" style="margin-bottom:18px;">
+      <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
+      <span>${esc(n.category)}</span>
+      <span>Por ${esc(n.createdByName)}</span>
+      <span>${new Date(n.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+    </div>
+  `;
+  if(canManage()){
+    const lbl = el('div','section-title','Atualizar status');
+    body.appendChild(lbl);
+    const seg = el('div','seg'); seg.id='statusSeg';
+    ['aberto','andamento','concluido'].forEach(s=>{
+      const o = el('div','seg-opt'+(n.status===s?' active':''), STATUS_LABEL[s]);
+      o.dataset.v = s;
+      o.onclick = async ()=>{
+        n.status = s; n.updatedAt = Date.now();
+        await saveNeeds();
+        seg.querySelectorAll('.seg-opt').forEach(x=>x.classList.remove('active'));
+        o.classList.add('active');
+        render(); toast('Status atualizado');
+      };
+      seg.appendChild(o);
+    });
+    body.appendChild(seg);
+
+    const del = el('button','btn btn-danger btn-block','Excluir necessidade');
+    del.style.marginTop='16px';
+    del.onclick = async ()=>{
+      state.needs = state.needs.filter(x=>x.id!==id);
+      await saveNeeds(); closeSheet(); render(); toast('Excluído');
+    };
+    body.appendChild(del);
+  } else if(n.createdBy===state.user.id){
+    const hint = el('div','helptext','Apenas coordenação pode alterar o status. Você pode acompanhar o andamento por aqui.');
+    body.appendChild(hint);
+  }
+  openSheet(n.title, body, true);
+}
+
+/* ---------------- Equipe (roster + permissões) ---------------- */
+function renderEquipe(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title', isAdmin() ? `Equipe (${state.roster.users.length})` : 'Equipe'));
+
+  if(isAdmin()){
+    const addBtn = el('button','btn btn-outline btn-block','+ Adicionar membro da equipe');
+    addBtn.style.marginBottom='12px';
+    addBtn.onclick = openAddMember;
+    wrap.appendChild(addBtn);
+  }
+
+  const card = el('div','card');
+  state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
+    const row = el('div','roster-row');
+    row.innerHTML = `
+      <div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (você)':''}</div><div class="roster-role">${esc(u.manualRole)}</div></div>
+      <span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>
+    `;
+    if(isAdmin() && u.id!==state.user.id){
+      row.style.cursor='pointer';
+      row.onclick = ()=> openEditMember(u.id);
+    }
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+
+  if(!isAdmin()){
+    wrap.appendChild(el('div','helptext','Apenas o administrador pode editar permissões da equipe.'));
+  }
+  return wrap;
+}
+
+function openAddMember(){
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Nome</label><input id="mName" placeholder="Nome completo"></div>
+    <div class="field"><label>Função (manual FSY)</label>
+      <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
+    </div>
+    <div class="field"><label>Nível de acesso no app</label>
+      <div class="seg" id="mAccess">
+        <div class="seg-opt active" data-v="consultor">Consultor</div>
+        <div class="seg-opt" data-v="coordenacao">Coordenação</div>
+        <div class="seg-opt" data-v="admin">Administrador</div>
+      </div>
+    </div>
+    <div class="field" id="pinField" style="display:none;"><label>PIN de administrador (4 dígitos)</label><input id="mPin" inputmode="numeric" maxlength="4"></div>
+  `;
+  body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+  body.querySelectorAll('#mAccess .seg-opt').forEach(o=> o.onclick=()=>{
+    body.querySelectorAll('#mAccess .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active');
+    $('#pinField').style.display = o.dataset.v==='admin' ? 'block' : 'none';
+  });
+  const save = el('button','btn btn-gold btn-block','Adicionar'); save.style.marginTop='6px';
+  body.appendChild(save);
+  openSheet('Adicionar membro', body, true);
+
+  save.onclick = async ()=>{
+    const name = $('#mName').value.trim();
+    if(!name){ toast('Digite o nome'); return; }
+    const role = body.querySelector('#mRole .seg-opt.active').dataset.v;
+    const access = body.querySelector('#mAccess .seg-opt.active').dataset.v;
+    let pin = null;
+    if(access==='admin'){
+      pin = $('#mPin').value.trim();
+      if(!/^\d{4}$/.test(pin)){ toast('PIN deve ter 4 dígitos'); return; }
+    }
+    state.roster.users.push({id:uid(), name, manualRole:role, access, pin});
+    await saveRoster(); closeSheet(); render(); toast('Membro adicionado');
+  };
+}
+
+function openEditMember(id){
+  const u = state.roster.users.find(x=>x.id===id);
+  if(!u) return;
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Nome</label><input id="emName" value="${esc(u.name)}"></div>
+    <div class="field"><label>Função (manual FSY)</label>
+      <div class="seg" id="emRole">${MANUAL_ROLES.map(r=>`<div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
+    </div>
+    <div class="field"><label>Nível de acesso no app</label>
+      <div class="seg" id="emAccess">
+        ${['consultor','coordenacao','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
+      </div>
+    </div>
+    <div class="field" id="empinField" style="display:${u.access==='admin'?'block':'none'};"><label>PIN de administrador</label><input id="emPin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}"></div>
+  `;
+  body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+  body.querySelectorAll('#emAccess .seg-opt').forEach(o=> o.onclick=()=>{
+    body.querySelectorAll('#emAccess .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active');
+    $('#empinField').style.display = o.dataset.v==='admin' ? 'block' : 'none';
+  });
+  const btnRow = el('div'); btnRow.style.display='flex'; btnRow.style.gap='8px'; btnRow.style.marginTop='6px';
+  const save = el('button','btn btn-gold','Salvar'); save.style.flex='1';
+  const del = el('button','btn btn-danger','Remover');
+  btnRow.appendChild(save); btnRow.appendChild(del);
+  body.appendChild(btnRow);
+  openSheet('Editar membro', body, true);
+
+  save.onclick = async ()=>{
+    const access = body.querySelector('#emAccess .seg-opt.active').dataset.v;
+    let pin = u.pin;
+    if(access==='admin'){
+      pin = $('#emPin').value.trim();
+      if(!/^\d{4}$/.test(pin)){ toast('PIN deve ter 4 dígitos'); return; }
+    }
+    u.name = $('#emName').value.trim() || u.name;
+    u.manualRole = body.querySelector('#emRole .seg-opt.active').dataset.v;
+    u.access = access; u.pin = access==='admin' ? pin : null;
+    await saveRoster(); closeSheet(); render(); toast('Atualizado');
+  };
+  del.onclick = async ()=>{
+    state.roster.users = state.roster.users.filter(x=>x.id!==id);
+    await saveRoster(); closeSheet(); render(); toast('Removido da equipe');
+  };
+}
+
+/* ---------------- Boot ---------------- */
+(async function init(){
+  $('#app').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#a39f92;font-size:13px;">Carregando…</div>';
+  await loadAll();
+  await tryAutoLogin();
+  render();
+  setInterval(refreshQuiet, 25000);
+})();
+</script>
+</body>
+</html>
