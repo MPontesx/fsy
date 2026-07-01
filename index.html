@@ -2,6 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 <title>FSY Equipe</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap');
@@ -20,18 +21,20 @@
   --radius:14px;
 }
 *{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;overflow-x:hidden;width:100%;}
 body{
   font-family:'Inter',system-ui,sans-serif;
   background:var(--soft);
   color:var(--ink);
   display:flex;
   justify-content:center;
+  -webkit-text-size-adjust:100%;
 }
 #app{
   width:100%;
   max-width:480px;
   min-height:100vh;
+  min-height:100dvh;
   background:var(--paper);
   display:flex;
   flex-direction:column;
@@ -51,7 +54,7 @@ body{
   top:0;
   z-index:30;
 }
-.brand{display:flex;align-items:center;gap:10px;}
+.brand{display:flex;align-items:center;gap:10px;min-width:0;}
 .badge-mark{
   width:34px;height:34px;border-radius:8px;
   background:linear-gradient(155deg,var(--gold),var(--gold-deep));
@@ -59,7 +62,7 @@ body{
   font-family:'Archivo Black',sans-serif;font-size:12px;color:#1a1408;
   flex-shrink:0;
 }
-.brand-text{display:flex;flex-direction:column;line-height:1.1;}
+.brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0;}
 .brand-text .t1{font-size:15px;font-weight:800;letter-spacing:0.01em;}
 .brand-text .t2{font-size:10px;color:#c8c4ba;letter-spacing:0.08em;text-transform:uppercase;}
 .user-chip{
@@ -68,13 +71,13 @@ body{
   border:1px solid rgba(255,255,255,0.15);
   padding:6px 10px;border-radius:20px;
   font-size:12px;cursor:pointer;
-  max-width:140px;
+  max-width:140px;flex-shrink:0;
 }
 .user-chip .dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0;}
 .user-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ---------- Content ---------- */
-#content{flex:1;padding:16px 16px 90px 16px;overflow-y:auto;}
+#content{flex:1;padding:16px 16px 90px 16px;overflow-y:auto;overflow-x:hidden;max-width:100%;}
 .section-title{
   font-size:11px;text-transform:uppercase;letter-spacing:0.1em;
   color:#8a8676;font-weight:700;margin:18px 0 8px 2px;
@@ -88,6 +91,7 @@ body{
   background:var(--ink);
   border-top:1px solid #000;
   z-index:30;
+  padding-bottom:env(safe-area-inset-bottom);
 }
 .navbtn{
   flex:1;padding:10px 4px 12px 4px;
@@ -125,7 +129,7 @@ body{
 .card-pad{padding:14px;}
 
 /* ---------- Day chips ---------- */
-.daychips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px 2px;}
+.daychips{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 10px 2px;-webkit-overflow-scrolling:touch;}
 .daychip{
   flex-shrink:0;
   padding:9px 14px;border-radius:10px;
@@ -156,7 +160,7 @@ body{
 }
 .act-time{
   font-size:11.5px;font-weight:800;color:var(--gold-deep);
-  width:70px;flex-shrink:0;padding-top:2px;
+  width:64px;flex-shrink:0;padding-top:2px;
 }
 .act-main{flex:1;min-width:0;}
 .act-title{font-size:14px;font-weight:700;line-height:1.3;}
@@ -172,31 +176,32 @@ body{
 .check svg{width:13px;height:13px;stroke:#fff;stroke-width:3;display:none;}
 .check.checked svg{display:block;}
 
-.act-detail{padding:0 14px 16px 94px;}
+.act-detail{padding:0 14px 16px 14px;}
 .matrix{
   display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px;
 }
 .matrix-item{
-  background:var(--soft);border-radius:8px;padding:7px 9px;font-size:11px;
+  background:var(--soft);border-radius:8px;padding:7px 9px;font-size:11px;min-width:0;
 }
 .matrix-item .role{font-weight:700;color:var(--ink-soft);display:block;margin-bottom:1px;font-size:10.5px;}
-.act-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:8px;}
+.act-desc{font-size:12.5px;color:var(--ink-soft);line-height:1.5;margin-bottom:8px;background:var(--soft);padding:9px 10px;border-radius:9px;}
 .act-meta{font-size:10.5px;color:#a39f92;margin-top:6px;}
 
 /* ---------- Needs ---------- */
-.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;}
+.filter-row{display:flex;gap:6px;overflow-x:auto;padding-bottom:10px;-webkit-overflow-scrolling:touch;}
 .fchip{
   flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:700;
   background:var(--soft2);color:var(--ink-soft);cursor:pointer;border:1.5px solid transparent;
+  white-space:nowrap;
 }
 .fchip.active{background:var(--ink);color:#fff;}
 
 .need-card{padding:14px;cursor:pointer;}
 .need-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-.need-title{font-weight:700;font-size:14px;}
+.need-title{font-weight:700;font-size:14px;min-width:0;}
 .tag{
   font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;
-  padding:3px 7px;border-radius:6px;white-space:nowrap;
+  padding:3px 7px;border-radius:6px;white-space:nowrap;flex-shrink:0;
 }
 .tag-aberto{background:#fbeae8;color:var(--red);}
 .tag-andamento{background:#fbf2dd;color:var(--gold-deep);}
@@ -220,9 +225,9 @@ body{
 .field label{display:block;font-size:11.5px;font-weight:700;color:var(--ink-soft);margin-bottom:5px;}
 .field input,.field select,.field textarea{
   width:100%;padding:10px 11px;border:1.5px solid var(--line);border-radius:9px;
-  font-family:inherit;font-size:13.5px;background:var(--paper);color:var(--ink);
+  font-family:inherit;font-size:16px;background:var(--paper);color:var(--ink);
 }
-.field textarea{resize:vertical;min-height:70px;}
+.field textarea{resize:vertical;min-height:70px;font-size:14px;}
 .seg{display:flex;gap:6px;flex-wrap:wrap;}
 .seg-opt{
   padding:7px 12px;border-radius:8px;background:var(--soft2);font-size:12px;font-weight:700;
@@ -238,16 +243,16 @@ body{
 .overlay.center{align-items:center;padding:20px;}
 .sheet{
   width:100%;max-width:480px;background:var(--paper);
-  border-radius:18px 18px 0 0;max-height:88vh;overflow-y:auto;
+  border-radius:18px 18px 0 0;max-height:88vh;max-height:88dvh;overflow-y:auto;
   animation:up .18s ease-out;
 }
-.overlay.center .sheet{border-radius:16px;max-height:85vh;}
+.overlay.center .sheet{border-radius:16px;max-height:85vh;max-height:85dvh;}
 @keyframes up{from{transform:translateY(24px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .sheet-head{
   display:flex;align-items:center;justify-content:space-between;
   padding:16px 16px 10px 16px;position:sticky;top:0;background:var(--paper);
 }
-.sheet-head h3{margin:0;font-size:17px;}
+.sheet-head h3{margin:0;font-size:17px;padding-right:8px;}
 .sheet-body{padding:0 16px 22px 16px;}
 .x{
   width:30px;height:30px;border-radius:50%;background:var(--soft2);border:none;
@@ -260,11 +265,11 @@ body{
 .empty .t{font-weight:700;color:var(--ink-soft);font-size:14px;margin-bottom:4px;}
 .empty .s{font-size:12px;}
 
-.roster-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);}
+.roster-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);gap:8px;}
 .roster-row:last-child{border-bottom:none;}
 .roster-name{font-weight:700;font-size:13.5px;}
 .roster-role{font-size:11px;color:#a39f92;margin-top:1px;}
-.lvl-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;}
+.lvl-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
 .lvl-admin{background:#f1e3c9;color:var(--gold-deep);}
 .lvl-coordenacao{background:#e2e8e3;color:var(--green);}
 .lvl-consultor{background:var(--soft2);color:var(--ink-soft);}
@@ -273,7 +278,7 @@ body{
   position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
   background:var(--ink);color:#fff;padding:10px 18px;border-radius:30px;
   font-size:12.5px;font-weight:600;z-index:200;opacity:0;transition:opacity .25s;
-  pointer-events:none;
+  pointer-events:none;max-width:90vw;text-align:center;
 }
 .toast.show{opacity:1;}
 
@@ -300,7 +305,13 @@ const ACCESS = {
   coordenacao:  {label:'Coordenação',    rank:2},
   consultor:    {label:'Consultor',      rank:1}
 };
-const MANUAL_ROLES = ['Consultor','Coordenador Assistente','Coordenador','Casal Diretor da Sessão'];
+// Adicionado 'Logística' como uma função de equipe (roster), igual às demais.
+const MANUAL_ROLES = ['Consultor','Coordenador Assistente','Coordenador','Casal Diretor da Sessão','Logística'];
+
+// Para quem uma necessidade pode ser encaminhada.
+const ASSIGN_TARGETS = ['Casal Diretor','Coordenador Assistente','Logística'];
+// Categorias de necessidade — 'Relato do Dia' é a nova categoria de feedback/observações.
+const NEED_CATEGORIES = ['Material','Problema','Relato do Dia','Outro'];
 
 let state = {
   user:null,           // {id,name,manualRole,access}
@@ -310,6 +321,7 @@ let state = {
   tab:'cronograma',
   day:0,
   needFilter:'todos',
+  needCatFilter:'todos',
   loaded:false
 };
 
@@ -341,8 +353,8 @@ function defaultSchedule(){
       {time:'9h15–10h', title:'Planejamento do consultor adjunto', roles:R('Dirigir','—','—','—')},
       {time:'9h15–10h45', title:'Distribuição de materiais e ensaio da orientação', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar, se desejar')},
       {time:'11h–13h', title:'Check-in', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar')},
-      {time:'13h15–14h', title:'Conheça seu consultor', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar')},
-      {time:'14h15–15h25', title:'Conheça sua companhia', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar')},
+      {time:'13h15–14h', title:'Conheça seu consultor', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar'), desc:'Primeira vez que você se encontra com seus jovens. Você terá cerca de 1 hora para: (1) demonstrar amor e animação; (2) usar um jogo de apresentação para todos aprenderem os nomes; (3) convidar o Espírito com uma escritura e testemunho; (4) explicar as normas e o vestuário esperado; (5) perguntar como você pode ajudá-los a terem uma ótima semana. Aproveite também para dividir os jovens em 4 equipes para a atividade "O Cristo Vivo" do dia 4.'},
+      {time:'14h15–15h25', title:'Conheça sua companhia', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar'), desc:'Reúna-se com toda a companhia. Use jogos de apresentação, depois oriente a escolha do nome da companhia com base na escritura designada e conduza a elaboração de metas pessoais e da companhia para a semana.'},
       {time:'15h40–16h25', title:'Orientação', roles:R('Participar','Auxiliar','Dirigir','Auxiliar')},
       {time:'16h30–16h50', title:'Tempo livre', roles:R('Participar','Participar','Dirigir','Participar, se desejar')},
       {time:'17h–17h50', title:'Brincadeiras da noite familiar', roles:R('Dirigir','Participar','Participar','Participar, se desejar')},
@@ -476,7 +488,7 @@ function isAdmin(){ return myAccessRank() >= 3; }
 
 function showAccountMenu(){
   const body = el('div');
-  body.innerHTML = `<div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de você até você sair.</div>`;
+  body.innerHTML = <div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de você até você sair.</div>;
   const swap = el('button','btn btn-outline btn-block','Trocar de usuário');
   swap.style.marginBottom = '8px';
   swap.onclick = ()=>{ showIdentityPicker(); };
@@ -499,11 +511,11 @@ function showIdentityPicker(){
     const list = el('div');
     state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
       const row = el('div','pick-row');
-      row.innerHTML = `<div><div class="roster-name">${esc(u.name)}</div><div class="roster-role">${esc(u.manualRole)}</div></div><span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>`;
+      row.innerHTML = <div><div class="roster-name">${esc(u.name)}</div><div class="roster-role">${esc(u.manualRole)}</div></div><span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>;
       row.onclick = ()=> selectIdentity(u);
       list.appendChild(row);
     });
-    body.innerHTML = `<div class="helptext">Toque no seu nome para entrar. Se você ainda não está na lista, peça para o administrador te adicionar na aba Equipe.</div>`;
+    body.innerHTML = <div class="helptext">Toque no seu nome para entrar. Se você ainda não está na lista, peça para o administrador te adicionar na aba Equipe.</div>;
     body.appendChild(list);
   }
   openSheet('Quem é você?', body, true);
@@ -523,7 +535,7 @@ function showIdentityPicker(){
 function selectIdentity(u){
   if(u.access==='admin' && u.pin){
     const body = el('div');
-    body.innerHTML = `<div class="field"><label>PIN de administrador</label><input id="pinInput" inputmode="numeric" maxlength="4" placeholder="0000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
+    body.innerHTML = <div class="field"><label>PIN de administrador</label><input id="pinInput" inputmode="numeric" maxlength="4" placeholder="0000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>;
     openSheet('Confirme seu PIN', body, true);
     $('#pinBtn').onclick = async ()=>{
       if($('#pinInput').value.trim() === u.pin){ closeSheet(); state.user = u; await rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!'); }
@@ -562,7 +574,7 @@ function openSheet(title, bodyNode, centered){
   ov.onclick = (e)=>{ if(e.target===ov) closeSheet(); };
   const sh = el('div','sheet');
   const head = el('div','sheet-head');
-  head.innerHTML = `<h3>${esc(title)}</h3>`;
+  head.innerHTML = <h3>${esc(title)}</h3>;
   const xbtn = el('button','x',ICONS.x); xbtn.onclick = closeSheet;
   head.appendChild(xbtn);
   const body = el('div','sheet-body');
@@ -580,9 +592,9 @@ function render(){
 
   // top bar
   const top = el('div','topbar');
-  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>`;
+  top.innerHTML = <div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>;
   const chip = el('div','user-chip');
-  chip.innerHTML = `<span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>`;
+  chip.innerHTML = <span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>;
   chip.onclick = state.user ? showAccountMenu : showIdentityPicker;
   top.appendChild(chip);
   app.appendChild(top);
@@ -614,7 +626,7 @@ function render(){
     ];
     tabs.forEach(t=>{
       const b = el('button','navbtn'+(state.tab===t.id?' active':''));
-      b.innerHTML = `<span class="ic">${t.icon}</span>${t.label}`;
+      b.innerHTML = <span class="ic">${t.icon}</span>${t.label};
       b.onclick = ()=>{ state.tab = t.id; render(); };
       nav.appendChild(b);
     });
@@ -661,7 +673,7 @@ function renderCronograma(){
   const day = state.schedule.days[state.day];
   const card = el('div','card');
   const head = el('div','day-header');
-  head.innerHTML = `<h2 class="display">${esc(day.name)}</h2>${day.sub?`<div class="dress">${esc(day.sub)}</div>`:''}<div class="dress">${esc(day.dress)}</div>`;
+  head.innerHTML = <h2 class="display">${esc(day.name)}</h2>${day.sub?<div class="dress">${esc(day.sub)}</div>:''}<div class="dress">${esc(day.dress)}</div>;
   card.appendChild(head);
 
   day.activities.forEach((a,idx)=>{
@@ -672,7 +684,7 @@ function renderCronograma(){
       <div class="act-time">${esc(a.time)}</div>
       <div class="act-main">
         <div class="act-title${a.done?' done':''}">${esc(a.title)}</div>
-        ${youAct ? `<div class="act-you">Você: <b>${esc(youAct)}</b></div>` : ''}
+        ${youAct ? <div class="act-you">Você: <b>${esc(youAct)}</b></div> : ''}
       </div>
       <div class="check${a.done?' checked':''}">${ICONS.check}</div>
     `;
@@ -683,16 +695,17 @@ function renderCronograma(){
     const detail = el('div','act-detail');
     detail.style.display = 'none';
     detail.innerHTML = `
-      ${a.desc ? `<div class="act-desc">${esc(a.desc)}</div>` : ''}
+      ${a.desc ? <div class="act-desc">${esc(a.desc)}</div> : ''}
       <div class="matrix">
         <div class="matrix-item"><span class="role">Consultor</span>${esc(a.roles.consultor)}</div>
         <div class="matrix-item"><span class="role">Coord. Assistente</span>${esc(a.roles.coordAssist)}</div>
         <div class="matrix-item"><span class="role">Coordenador</span>${esc(a.roles.coordenador)}</div>
         <div class="matrix-item"><span class="role">Casal Diretor</span>${esc(a.roles.casalDiretor)}</div>
       </div>
-      ${a.doneBy ? `<div class="act-meta">Concluído por ${esc(a.doneBy)}</div>` : ''}
+      ${a.doneBy ? <div class="act-meta">Concluído por ${esc(a.doneBy)}</div> : ''}
     `;
-    if(canManage()){
+    // Somente o administrador pode editar o resumo/descrição da atividade.
+    if(isAdmin()){
       const editBtn = el('button','btn btn-ghost btn-sm','Editar atividade');
       editBtn.style.marginTop = '4px';
       editBtn.onclick = (e)=>{ e.stopPropagation(); openEditActivity(state.day, idx); };
@@ -702,7 +715,7 @@ function renderCronograma(){
     card.appendChild(act);
   });
 
-  if(canManage()){
+  if(isAdmin()){
     const addRow = el('div','card-pad');
     const addBtn = el('button','btn btn-outline btn-block','+ Adicionar atividade neste dia');
     addBtn.onclick = ()=> openEditActivity(state.day, null);
@@ -729,7 +742,7 @@ function openEditActivity(dayIdx, actIdx){
   body.innerHTML = `
     <div class="field"><label>Horário</label><input id="eTime" value="${esc(a.time)}" placeholder="Ex: 9h–10h"></div>
     <div class="field"><label>Atividade</label><input id="eTitle" value="${esc(a.title)}" placeholder="Nome da atividade"></div>
-    <div class="field"><label>Descrição / o que será usado</label><textarea id="eDesc" placeholder="Detalhes da atividade, materiais necessários...">${esc(a.desc||'')}</textarea></div>
+    <div class="field"><label>Resumo / o que fazer nessa atividade</label><textarea id="eDesc" placeholder="Ex: pontos-chave que o consultor deve cobrir, materiais necessários, tempo sugerido...">${esc(a.desc||'')}</textarea></div>
     <div class="field"><label>Consultor</label><input id="eR1" value="${esc(a.roles.consultor)}"></div>
     <div class="field"><label>Coordenador Assistente</label><input id="eR2" value="${esc(a.roles.coordAssist)}"></div>
     <div class="field"><label>Coordenador</label><input id="eR3" value="${esc(a.roles.coordenador)}"></div>
@@ -768,8 +781,9 @@ const PRIO_LABEL = {baixa:'Baixa',media:'Média',alta:'Alta',urgente:'Urgente'};
 
 function renderNecessidades(){
   const wrap = el('div');
-  wrap.appendChild(el('div','section-title','Necessidades e problemas'));
+  wrap.appendChild(el('div','section-title','Necessidades e relatos'));
 
+  // Filtro por status
   const filters = el('div','filter-row');
   ['todos','aberto','andamento','concluido'].forEach(f=>{
     const c = el('div','fchip'+(state.needFilter===f?' active':''), f==='todos'?'Todos':STATUS_LABEL[f]);
@@ -778,12 +792,23 @@ function renderNecessidades(){
   });
   wrap.appendChild(filters);
 
+  // Filtro por categoria (permite isolar só os "Relato do Dia", por exemplo)
+  const catFilters = el('div','filter-row');
+  ['todos', ...NEED_CATEGORIES].forEach(f=>{
+    const label = f==='todos' ? 'Todas categorias' : f;
+    const c = el('div','fchip'+(state.needCatFilter===f?' active':''), label);
+    c.onclick = ()=>{ state.needCatFilter=f; render(); };
+    catFilters.appendChild(c);
+  });
+  wrap.appendChild(catFilters);
+
   let list = state.needs.slice().sort((a,b)=> b.createdAt - a.createdAt);
   if(state.needFilter!=='todos') list = list.filter(n=>n.status===state.needFilter);
+  if(state.needCatFilter!=='todos') list = list.filter(n=>n.category===state.needCatFilter);
 
   if(list.length===0){
     const e = el('div','empty');
-    e.innerHTML = `<div class="ic">📋</div><div class="t">Nada por aqui</div><div class="s">Toque no botão + para registrar um pedido, problema ou material necessário.</div>`;
+    e.innerHTML = <div class="ic">📋</div><div class="t">Nada por aqui</div><div class="s">Toque no botão + para registrar um pedido, problema, material necessário ou um relato do dia.</div>;
     wrap.appendChild(e);
     return wrap;
   }
@@ -799,6 +824,7 @@ function renderNecessidades(){
       <div class="need-meta">
         <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
         <span>${esc(n.category)}</span>
+        <span>Para: ${esc(n.assignedTo||'—')}</span>
         <span>${esc(n.createdByName)}</span>
       </div>
     `;
@@ -815,34 +841,50 @@ function openNewNeed(){
     <div class="field"><label>Descrição</label><textarea id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
     <div class="field"><label>Categoria</label>
       <div class="seg" id="nCat">
-        ${['Material','Problema','Outro'].map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>`).join('')}
+        ${NEED_CATEGORIES.map((c,i)=><div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>).join('')}
       </div>
     </div>
-    <div class="field"><label>Prioridade</label>
+    <div class="field"><label>Encaminhar para</label>
+      <div class="seg" id="nAssign">
+        ${ASSIGN_TARGETS.map((a,i)=><div class="seg-opt${i===0?' active':''}" data-v="${a}">${a}</div>).join('')}
+      </div>
+    </div>
+    <div class="field" id="prioField"><label>Prioridade</label>
       <div class="seg" id="nPrio">
-        ${['baixa','media','alta','urgente'].map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${PRIO_LABEL[c]}</div>`).join('')}
+        ${['baixa','media','alta','urgente'].map((c,i)=><div class="seg-opt${i===0?' active':''}" data-v="${c}">${PRIO_LABEL[c]}</div>).join('')}
       </div>
     </div>
   `;
-  body.querySelectorAll('#nCat .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#nCat .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+  body.querySelectorAll('#nCat .seg-opt').forEach(o=> o.onclick=()=>{
+    body.querySelectorAll('#nCat .seg-opt').forEach(x=>x.classList.remove('active'));
+    o.classList.add('active');
+    // Se for "Relato do Dia", ajusta o texto do campo e esconde a prioridade (não faz sentido para um relato).
+    const isRelato = o.dataset.v === 'Relato do Dia';
+    $('#nDesc').placeholder = isRelato
+      ? 'Conte como foi o dia: desafios, dificuldades com os jovens, sugestões para melhorar amanhã...'
+      : 'Descreva o que está precisando ou o problema enfrentado';
+    $('#prioField').style.display = isRelato ? 'none' : 'block';
+  });
+  body.querySelectorAll('#nAssign .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#nAssign .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#nPrio .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#nPrio .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
 
   const save = el('button','btn btn-gold btn-block','Registrar');
   save.style.marginTop = '6px';
   body.appendChild(save);
-  openSheet('Nova necessidade', body, true);
+  openSheet('Nova necessidade / relato', body, true);
 
   save.onclick = async ()=>{
     const title = $('#nTitle').value.trim();
     if(!title){ toast('Digite um título'); return; }
     const cat = body.querySelector('#nCat .seg-opt.active').dataset.v;
+    const assignedTo = body.querySelector('#nAssign .seg-opt.active').dataset.v;
     const prio = body.querySelector('#nPrio .seg-opt.active').dataset.v;
     state.needs.push({
       id:uid(), title, desc:$('#nDesc').value.trim(), category:cat, priority:prio,
       status:'aberto', createdBy:state.user.id, createdByName:state.user.name,
-      assignedTo:null, createdAt:Date.now(), updatedAt:Date.now()
+      assignedTo, createdAt:Date.now(), updatedAt:Date.now()
     });
-    await saveNeeds(); closeSheet(); render(); toast('Necessidade registrada');
+    await saveNeeds(); closeSheet(); render(); toast('Registrado com sucesso');
   };
 }
 
@@ -855,6 +897,7 @@ function openNeedDetail(id){
     <div class="need-meta" style="margin-bottom:18px;">
       <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
       <span>${esc(n.category)}</span>
+      <span>Para: ${esc(n.assignedTo||'—')}</span>
       <span>Por ${esc(n.createdByName)}</span>
       <span>${new Date(n.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
     </div>
@@ -894,7 +937,7 @@ function openNeedDetail(id){
 /* ---------------- Equipe (roster + permissões) ---------------- */
 function renderEquipe(){
   const wrap = el('div');
-  wrap.appendChild(el('div','section-title', isAdmin() ? `Equipe (${state.roster.users.length})` : 'Equipe'));
+  wrap.appendChild(el('div','section-title', isAdmin() ? Equipe (${state.roster.users.length}) : 'Equipe'));
 
   if(isAdmin()){
     const addBtn = el('button','btn btn-outline btn-block','+ Adicionar membro da equipe');
@@ -929,7 +972,7 @@ function openAddMember(){
   body.innerHTML = `
     <div class="field"><label>Nome</label><input id="mName" placeholder="Nome completo"></div>
     <div class="field"><label>Função (manual FSY)</label>
-      <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
+      <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=><div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>).join('')}</div>
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="mAccess">
@@ -971,11 +1014,11 @@ function openEditMember(id){
   body.innerHTML = `
     <div class="field"><label>Nome</label><input id="emName" value="${esc(u.name)}"></div>
     <div class="field"><label>Função (manual FSY)</label>
-      <div class="seg" id="emRole">${MANUAL_ROLES.map(r=>`<div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
+      <div class="seg" id="emRole">${MANUAL_ROLES.map(r=><div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>).join('')}</div>
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="emAccess">
-        ${['consultor','coordenacao','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
+        ${['consultor','coordenacao','admin'].map(a=><div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>).join('')}
       </div>
     </div>
     <div class="field" id="empinField" style="display:${u.access==='admin'?'block':'none'};"><label>PIN de administrador</label><input id="emPin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}"></div>
