@@ -294,11 +294,30 @@ body{
 <div id="app"></div>
 <div class="toast" id="toast"></div>
 
-<script>
+<script type="module">
 /* ============================================================
    FSY EQUIPE — app de coordenação de staff para acampamento
-   Dados compartilhados via window.storage (shared=true)
+   Dados compartilhados via Firebase Firestore (tempo real)
    ============================================================ */
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCnKe8i0aXn9ZresRun2LfqRay4TEG4szU",
+  authDomain: "fsy-2027-recnorte.firebaseapp.com",
+  projectId: "fsy-2027-recnorte",
+  storageBucket: "fsy-2027-recnorte.firebasestorage.app",
+  messagingSenderId: "216443030905",
+  appId: "1:216443030905:web:0e08e5e6514b5a6fae33a8"
+};
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+
+// Um documento por "gaveta" de dados, todos dentro da coleção 'fsyEquipe'.
+const rosterRef   = doc(db, 'fsyEquipe', 'roster');
+const needsRef    = doc(db, 'fsyEquipe', 'needs');
+const scheduleRef = doc(db, 'fsyEquipe', 'schedule');
 
 const ACCESS = {
   admin:        {label:'Administrador', rank:3},
@@ -438,37 +457,43 @@ function defaultSchedule(){
 /* ---------------- Storage ---------------- */
 async function loadAll(){
   try{
-    const r = await window.storage.get('roster', true);
-    state.roster = r ? JSON.parse(r.value) : {users:[]};
+    const snap = await getDoc(rosterRef);
+    state.roster = snap.exists() ? snap.data() : {users:[]};
   }catch(e){ state.roster = {users:[]}; }
 
   try{
-    const n = await window.storage.get('needs', true);
-    state.needs = n ? JSON.parse(n.value) : [];
+    const snap = await getDoc(needsRef);
+    state.needs = snap.exists() ? (snap.data().items || []) : [];
   }catch(e){ state.needs = []; }
 
   try{
-    const s = await window.storage.get('schedule', true);
-    state.schedule = s ? JSON.parse(s.value) : defaultSchedule();
-    if(!s){ await window.storage.set('schedule', JSON.stringify(state.schedule), true); }
+    const snap = await getDoc(scheduleRef);
+    if(snap.exists()){
+      state.schedule = snap.data();
+    } else {
+      state.schedule = defaultSchedule();
+      await setDoc(scheduleRef, state.schedule);
+    }
   }catch(e){ state.schedule = defaultSchedule(); }
 
   state.loaded = true;
 }
-async function saveRoster(){ try{ await window.storage.set('roster', JSON.stringify(state.roster), true); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
-async function saveNeeds(){ try{ await window.storage.set('needs', JSON.stringify(state.needs), true); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
-async function saveSchedule(){ try{ await window.storage.set('schedule', JSON.stringify(state.schedule), true); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+async function saveRoster(){ try{ await setDoc(rosterRef, state.roster); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+async function saveNeeds(){ try{ await setDoc(needsRef, {items: state.needs}); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+async function saveSchedule(){ try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 
-async function refreshQuiet(){
-  try{
-    const n = await window.storage.get('needs', true);
-    if(n) state.needs = JSON.parse(n.value);
-    const s = await window.storage.get('schedule', true);
-    if(s) state.schedule = JSON.parse(s.value);
-    const r = await window.storage.get('roster', true);
-    if(r) state.roster = JSON.parse(r.value);
-    render();
-  }catch(e){ /* silent */ }
+/* Escuta em tempo real: qualquer alteração de qualquer aparelho chega aqui sozinha,
+   sem precisar de setInterval ficando martelando o servidor. */
+function startRealtimeSync(){
+  onSnapshot(rosterRef, snap=>{
+    if(snap.exists()){ state.roster = snap.data(); render(); }
+  }, err=>console.warn('sync roster:', err));
+  onSnapshot(needsRef, snap=>{
+    if(snap.exists()){ state.needs = snap.data().items || []; render(); }
+  }, err=>console.warn('sync needs:', err));
+  onSnapshot(scheduleRef, snap=>{
+    if(snap.exists()){ state.schedule = snap.data(); render(); }
+  }, err=>console.warn('sync schedule:', err));
 }
 
 /* ---------------- Icons ---------------- */
@@ -546,20 +571,20 @@ function selectIdentity(u){
   }
 }
 
-/* ---------------- Lembrar identidade neste aparelho (storage pessoal) ----------------
-   shared=false => cada pessoa que abre o app tem sua própria gaveta de armazenamento.
-   Por isso dá pra guardar "quem sou eu" aqui sem misturar com os dados dos outros 59. */
+/* ---------------- Lembrar identidade neste aparelho (storage local do navegador) ----------------
+   Isso é só do aparelho, não vai pro Firestore — por isso usamos localStorage.
+   Cada pessoa que abre o app no seu celular guarda só o próprio ID aqui. */
 async function rememberIdentity(u){
-  try{ await window.storage.set('myIdentity', JSON.stringify({id:u.id}), false); }catch(e){ /* sem problema se falhar */ }
+  try{ localStorage.setItem('fsyMyIdentity', JSON.stringify({id:u.id})); }catch(e){ /* sem problema se falhar */ }
 }
 async function forgetIdentity(){
-  try{ await window.storage.delete('myIdentity', false); }catch(e){ /* já não existia */ }
+  try{ localStorage.removeItem('fsyMyIdentity'); }catch(e){ /* já não existia */ }
 }
 async function tryAutoLogin(){
   try{
-    const saved = await window.storage.get('myIdentity', false);
+    const saved = localStorage.getItem('fsyMyIdentity');
     if(!saved) return false;
-    const { id } = JSON.parse(saved.value);
+    const { id } = JSON.parse(saved);
     const u = state.roster.users.find(x=>x.id===id);
     if(u){ state.user = u; return true; }
   }catch(e){ /* nada salvo ainda, ou erro de leitura — segue pro login normal */ }
@@ -1059,7 +1084,7 @@ function openEditMember(id){
   await loadAll();
   await tryAutoLogin();
   render();
-  setInterval(refreshQuiet, 25000);
+  startRealtimeSync();
 })();
 </script>
 </body>
