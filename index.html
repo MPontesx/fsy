@@ -272,6 +272,7 @@ body{
 .lvl-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
 .lvl-admin{background:#f1e3c9;color:var(--gold-deep);}
 .lvl-coordenacao{background:#e2e8e3;color:var(--green);}
+.lvl-logistica{background:#e3e8f0;color:#3a5a8c;}
 .lvl-consultor{background:var(--soft2);color:var(--ink-soft);}
 
 .toast{
@@ -322,6 +323,7 @@ const scheduleRef = doc(db, 'fsyEquipe', 'schedule');
 const ACCESS = {
   admin:        {label:'Administrador', rank:3},
   coordenacao:  {label:'Coordenação',    rank:2},
+  logistica:    {label:'Logística',      rank:2},
   consultor:    {label:'Consultor',      rank:1}
 };
 // Adicionado 'Logística' como uma função de equipe (roster), igual às demais.
@@ -508,8 +510,20 @@ const ICONS = {
 
 /* ---------------- Identity ---------------- */
 function myAccessRank(){ return state.user ? ACCESS[state.user.access].rank : 0; }
-function canManage(){ return myAccessRank() >= 2; } // coordenacao ou admin
+function canManage(){ return myAccessRank() >= 2; } // coordenacao, logistica ou admin
 function isAdmin(){ return myAccessRank() >= 3; }
+// Uma necessidade encaminhada para "Logística" só aparece/pode ser gerida por quem é da Logística
+// (ou pelo administrador). Quem registrou o chamado continua enxergando o próprio chamado.
+function canSeeNeed(n){
+  if(isAdmin()) return true;
+  if(n.assignedTo==='Logística') return state.user.access==='logistica' || n.createdBy===state.user.id;
+  return true;
+}
+function canManageNeed(n){
+  if(isAdmin()) return true;
+  if(n.assignedTo==='Logística') return state.user.access==='logistica';
+  return canManage();
+}
 
 function showAccountMenu(){
   const body = el('div');
@@ -529,7 +543,7 @@ function showIdentityPicker(){
     body.innerHTML = `
       <div class="helptext">Ninguém configurado ainda. Crie a conta de administrador para começar — você poderá adicionar o resto da equipe e definir permissões depois.</div>
       <div class="field"><label>Seu nome</label><input id="setupName" placeholder="Ex: Ednilson Godoy"></div>
-      <div class="field"><label>Crie um PIN de administrador (4 dígitos)</label><input id="setupPin" inputmode="numeric" maxlength="4" placeholder="0000"></div>
+      <div class="field"><label>Crie um PIN de acesso (5 dígitos)</label><input id="setupPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
       <button class="btn btn-gold btn-block" id="setupBtn">Criar conta de administrador</button>
     `;
   } else {
@@ -549,7 +563,7 @@ function showIdentityPicker(){
       const name = $('#setupName').value.trim();
       const pin = $('#setupPin').value.trim();
       if(!name){ toast('Digite seu nome'); return; }
-      if(!/^\d{4}$/.test(pin)){ toast('PIN deve ter 4 dígitos'); return; }
+      if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
       const u = {id:uid(), name, manualRole:'Casal Diretor da Sessão', access:'admin', pin};
       state.roster.users.push(u);
       await saveRoster();
@@ -558,9 +572,9 @@ function showIdentityPicker(){
   }
 }
 function selectIdentity(u){
-  if(u.access==='admin' && u.pin){
+  if(u.pin){
     const body = el('div');
-    body.innerHTML = `<div class="field"><label>PIN de administrador</label><input id="pinInput" inputmode="numeric" maxlength="4" placeholder="0000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
+    body.innerHTML = `<div class="field"><label>PIN de acesso</label><input id="pinInput" inputmode="numeric" maxlength="5" placeholder="00000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
     openSheet('Confirme seu PIN', body, true);
     $('#pinBtn').onclick = async ()=>{
       if($('#pinInput').value.trim() === u.pin){ closeSheet(); state.user = u; await rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!'); }
@@ -827,7 +841,7 @@ function renderNecessidades(){
   });
   wrap.appendChild(catFilters);
 
-  let list = state.needs.slice().sort((a,b)=> b.createdAt - a.createdAt);
+  let list = state.needs.slice().filter(canSeeNeed).sort((a,b)=> b.createdAt - a.createdAt);
   if(state.needFilter!=='todos') list = list.filter(n=>n.status===state.needFilter);
   if(state.needCatFilter!=='todos') list = list.filter(n=>n.category===state.needCatFilter);
 
@@ -927,7 +941,7 @@ function openNeedDetail(id){
       <span>${new Date(n.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
     </div>
   `;
-  if(canManage()){
+  if(canManageNeed(n)){
     const lbl = el('div','section-title','Atualizar status');
     body.appendChild(lbl);
     const seg = el('div','seg'); seg.id='statusSeg';
@@ -953,7 +967,9 @@ function openNeedDetail(id){
     };
     body.appendChild(del);
   } else if(n.createdBy===state.user.id){
-    const hint = el('div','helptext','Apenas coordenação pode alterar o status. Você pode acompanhar o andamento por aqui.');
+    const hint = el('div','helptext', n.assignedTo==='Logística'
+      ? 'Este chamado foi encaminhado para a Logística. Apenas a equipe de logística (ou o administrador) pode alterar o status. Você pode acompanhar o andamento por aqui.'
+      : 'Apenas coordenação pode alterar o status. Você pode acompanhar o andamento por aqui.');
     body.appendChild(hint);
   }
   openSheet(n.title, body, true);
@@ -1003,15 +1019,15 @@ function openAddMember(){
       <div class="seg" id="mAccess">
         <div class="seg-opt active" data-v="consultor">Consultor</div>
         <div class="seg-opt" data-v="coordenacao">Coordenação</div>
+        <div class="seg-opt" data-v="logistica">Logística</div>
         <div class="seg-opt" data-v="admin">Administrador</div>
       </div>
     </div>
-    <div class="field" id="pinField" style="display:none;"><label>PIN de administrador (4 dígitos)</label><input id="mPin" inputmode="numeric" maxlength="4"></div>
+    <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input id="mPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
   `;
   body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#mAccess .seg-opt').forEach(o=> o.onclick=()=>{
     body.querySelectorAll('#mAccess .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active');
-    $('#pinField').style.display = o.dataset.v==='admin' ? 'block' : 'none';
   });
   const save = el('button','btn btn-gold btn-block','Adicionar'); save.style.marginTop='6px';
   body.appendChild(save);
@@ -1022,11 +1038,8 @@ function openAddMember(){
     if(!name){ toast('Digite o nome'); return; }
     const role = body.querySelector('#mRole .seg-opt.active').dataset.v;
     const access = body.querySelector('#mAccess .seg-opt.active').dataset.v;
-    let pin = null;
-    if(access==='admin'){
-      pin = $('#mPin').value.trim();
-      if(!/^\d{4}$/.test(pin)){ toast('PIN deve ter 4 dígitos'); return; }
-    }
+    const pin = $('#mPin').value.trim();
+    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
     state.roster.users.push({id:uid(), name, manualRole:role, access, pin});
     await saveRoster(); closeSheet(); render(); toast('Membro adicionado');
   };
@@ -1043,15 +1056,14 @@ function openEditMember(id){
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="emAccess">
-        ${['consultor','coordenacao','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
+        ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
-    <div class="field" id="empinField" style="display:${u.access==='admin'?'block':'none'};"><label>PIN de administrador</label><input id="emPin" inputmode="numeric" maxlength="4" value="${esc(u.pin||'')}"></div>
+    <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input id="emPin" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
   `;
   body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#emAccess .seg-opt').forEach(o=> o.onclick=()=>{
     body.querySelectorAll('#emAccess .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active');
-    $('#empinField').style.display = o.dataset.v==='admin' ? 'block' : 'none';
   });
   const btnRow = el('div'); btnRow.style.display='flex'; btnRow.style.gap='8px'; btnRow.style.marginTop='6px';
   const save = el('button','btn btn-gold','Salvar'); save.style.flex='1';
@@ -1062,14 +1074,11 @@ function openEditMember(id){
 
   save.onclick = async ()=>{
     const access = body.querySelector('#emAccess .seg-opt.active').dataset.v;
-    let pin = u.pin;
-    if(access==='admin'){
-      pin = $('#emPin').value.trim();
-      if(!/^\d{4}$/.test(pin)){ toast('PIN deve ter 4 dígitos'); return; }
-    }
+    const pin = $('#emPin').value.trim();
+    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
     u.name = $('#emName').value.trim() || u.name;
     u.manualRole = body.querySelector('#emRole .seg-opt.active').dataset.v;
-    u.access = access; u.pin = access==='admin' ? pin : null;
+    u.access = access; u.pin = pin;
     await saveRoster(); closeSheet(); render(); toast('Atualizado');
   };
   del.onclick = async ()=>{
