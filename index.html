@@ -631,7 +631,7 @@ function render(){
 
   // top bar
   const top = el('div','topbar');
-  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>`;
+  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">FSY RECIFE NORTE</div><div class="t2">Conferência 2027</div></div></div>`;
   const chip = el('div','user-chip');
   chip.innerHTML = `<span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>`;
   chip.onclick = state.user ? showAccountMenu : showIdentityPicker;
