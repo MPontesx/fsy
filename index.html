@@ -297,7 +297,7 @@ body{
 
 <script type="module">
 /* ============================================================
-   FSY EQUIPE — app de coordenação de staff para acampamento
+   FSY EQUIPE � app de coordena��o de staff para acampamento
    Dados compartilhados via Firebase Firestore (tempo real)
    ============================================================ */
 
@@ -315,23 +315,23 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
-// Um documento por "gaveta" de dados, todos dentro da coleção 'fsyEquipe'.
+// Um documento por "gaveta" de dados, todos dentro da cole��o 'fsyEquipe'.
 const rosterRef   = doc(db, 'fsyEquipe', 'roster');
 const needsRef    = doc(db, 'fsyEquipe', 'needs');
 const scheduleRef = doc(db, 'fsyEquipe', 'schedule');
 
 const ACCESS = {
   admin:        {label:'Administrador', rank:3},
-  coordenacao:  {label:'Coordenação',    rank:2},
-  logistica:    {label:'Logística',      rank:2},
+  coordenacao:  {label:'Coordena��o',    rank:2},
+  logistica:    {label:'Log�stica',      rank:2},
   consultor:    {label:'Consultor',      rank:1}
 };
-// Adicionado 'Logística' como uma função de equipe (roster), igual às demais.
-const MANUAL_ROLES = ['Consultor','Coordenador Assistente','Coordenador','Casal Diretor da Sessão','Logística'];
+// Adicionado 'Log�stica' como uma fun��o de equipe (roster), igual �s demais.
+const MANUAL_ROLES = ['Consultor','Coordenador Assistente','Coordenador','Casal Diretor da Sess�o','Log�stica'];
 
 // Para quem uma necessidade pode ser encaminhada.
-const ASSIGN_TARGETS = ['Casal Diretor','Coordenador Assistente','Logística'];
-// Categorias de necessidade — 'Relato do Dia' é a nova categoria de feedback/observações.
+const ASSIGN_TARGETS = ['Casal Diretor','Coordenador Assistente','Log�stica'];
+// Categorias de necessidade � 'Relato do Dia' � a nova categoria de feedback/observa��es.
 const NEED_CATEGORIES = ['Material','Problema','Relato do Dia','Outro'];
 
 let state = {
@@ -360,98 +360,98 @@ function toast(msg){
 function defaultSchedule(){
   const R = (c,ca,co,cd) => ({consultor:c, coordAssist:ca, coordenador:co, casalDiretor:cd});
   return { days: [
-    { id:'d0', name:'Dia Zero', sub:'Dia antes do início da conferência', dress:'Roupa casual', activities:[
-      {time:'A definir', title:'Visita às instalações/locais', roles:R('Participar','Participar','Liderar','Participar, se desejar'), desc:'Familiarize-se com o local e as instalações para saber direcionar os participantes. Inclui áreas reservadas, alojamentos, refeitório, campos e áreas de tempo livre.'},
-      {time:'A definir', title:'Orientação para os consultores', roles:R('Participar','—','Dirigir','—'), desc:'Saiba mais sobre seu papel e responsabilidades como consultor na conferência FSY. Chegue no horário e faça anotações.'},
-      {time:'19h–20h', title:'Mensagem do casal diretor da sessão', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Reunião obrigatória para toda a equipe. Recebimento de aperfeiçoamento espiritual em preparação para a sessão. Não se atrase e faça anotações.'},
-      {time:'20h15–21h15', title:'Reuniões CA e consultores / Consultor e adjunto', roles:R('Participar','Participar','Participar','Participar'), desc:'Grupo de debate de coordenadores assistentes e consultores: fortaleça o relacionamento com sua equipe, defina expectativas e metas da semana. Planejamento e entrevistas com o(s) consultor(es) adjunto(s): apresentem-se, troquem contatos, definam local de encontro da companhia e combinem estilos de ensino.'},
-      {time:'21h20–21h50', title:'Reunião dupla de Coordenadores e Coordenadores Assistentes', roles:R('—','Participar','Dirigir','—'), desc:''}
+    { id:'d0', name:'Dia Zero', sub:'Dia antes do in�cio da confer�ncia', dress:'Roupa casual', activities:[
+      {time:'A definir', title:'Visita �s instala��es/locais', roles:R('Participar','Participar','Liderar','Participar, se desejar'), desc:'Familiarize-se com o local e as instala��es para saber direcionar os participantes. Inclui �reas reservadas, alojamentos, refeit�rio, campos e �reas de tempo livre.'},
+      {time:'A definir', title:'Orienta��o para os consultores', roles:R('Participar','�','Dirigir','�'), desc:'Saiba mais sobre seu papel e responsabilidades como consultor na confer�ncia FSY. Chegue no hor�rio e fa�a anota��es.'},
+      {time:'19h�20h', title:'Mensagem do casal diretor da sess�o', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Reuni�o obrigat�ria para toda a equipe. Recebimento de aperfei�oamento espiritual em prepara��o para a sess�o. N�o se atrase e fa�a anota��es.'},
+      {time:'20h15�21h15', title:'Reuni�es CA e consultores / Consultor e adjunto', roles:R('Participar','Participar','Participar','Participar'), desc:'Grupo de debate de coordenadores assistentes e consultores: fortale�a o relacionamento com sua equipe, defina expectativas e metas da semana. Planejamento e entrevistas com o(s) consultor(es) adjunto(s): apresentem-se, troquem contatos, definam local de encontro da companhia e combinem estilos de ensino.'},
+      {time:'21h20�21h50', title:'Reuni�o dupla de Coordenadores e Coordenadores Assistentes', roles:R('�','Participar','Dirigir','�'), desc:''}
     ]},
-    { id:'d1', name:'1º Dia', sub:'Chegada e início da sessão', dress:'Camiseta da Equipe FSY', activities:[
-      {time:'7h30–8h20', title:'Desjejum da equipe', roles:R('Participar','Participar','Participar','Participar')},
-      {time:'8h–8h20', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('—','Participar','Dirigir','—')},
-      {time:'8h30–9h15', title:'Reunião administrativa', roles:R('Participar','Participar','Dirigir','Compartilhar mensagem de 5 min')},
-      {time:'9h15–10h', title:'Planejamento do consultor adjunto', roles:R('Dirigir','—','—','—')},
-      {time:'9h15–10h45', title:'Distribuição de materiais e ensaio da orientação', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar, se desejar')},
-      {time:'11h–13h', title:'Check-in', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar')},
-      {time:'13h15–14h', title:'Conheça seu consultor', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar'), desc:'Primeira vez que você se encontra com seus jovens. Você terá cerca de 1 hora para: (1) demonstrar amor e animação; (2) usar um jogo de apresentação para todos aprenderem os nomes; (3) convidar o Espírito com uma escritura e testemunho; (4) explicar as normas e o vestuário esperado; (5) perguntar como você pode ajudá-los a terem uma ótima semana. Aproveite também para dividir os jovens em 4 equipes para a atividade "O Cristo Vivo" do dia 4.'},
-      {time:'14h15–15h25', title:'Conheça sua companhia', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar'), desc:'Reúna-se com toda a companhia. Use jogos de apresentação, depois oriente a escolha do nome da companhia com base na escritura designada e conduza a elaboração de metas pessoais e da companhia para a semana.'},
-      {time:'15h40–16h25', title:'Orientação', roles:R('Participar','Auxiliar','Dirigir','Auxiliar')},
-      {time:'16h30–16h50', title:'Tempo livre', roles:R('Participar','Participar','Dirigir','Participar, se desejar')},
-      {time:'17h–17h50', title:'Brincadeiras da noite familiar', roles:R('Dirigir','Participar','Participar','Participar, se desejar')},
-      {time:'18h–18h50', title:'Aula da noite familiar', roles:R('Participar','Participar','Dirigir','Ensinar')},
-      {time:'19h–20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'21h15–22h', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
-      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
-      {time:'22h20–22h50', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('Supervisionar','Auxiliar','Auxiliar','Participar, se desejar')},
-      {time:'23h', title:'Staff se recolher', roles:R('—','Supervisionar','Supervisionar','Supervisionar')}
+    { id:'d1', name:'1� Dia', sub:'Chegada e in�cio da sess�o', dress:'Camiseta da Equipe FSY', activities:[
+      {time:'7h30�8h20', title:'Desjejum da equipe', roles:R('Participar','Participar','Participar','Participar')},
+      {time:'8h�8h20', title:'Reuni�o de coordenadores/coordenadores assistentes', roles:R('�','Participar','Dirigir','�')},
+      {time:'8h30�9h15', title:'Reuni�o administrativa', roles:R('Participar','Participar','Dirigir','Compartilhar mensagem de 5 min')},
+      {time:'9h15�10h', title:'Planejamento do consultor adjunto', roles:R('Dirigir','�','�','�')},
+      {time:'9h15�10h45', title:'Distribui��o de materiais e ensaio da orienta��o', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar, se desejar')},
+      {time:'11h�13h', title:'Check-in', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar')},
+      {time:'13h15�14h', title:'Conhe�a seu consultor', roles:R('Dirigir','Participar, se desejar','�','Participar, se desejar'), desc:'Primeira vez que voc� se encontra com seus jovens. Voc� ter� cerca de 1 hora para: (1) demonstrar amor e anima��o; (2) usar um jogo de apresenta��o para todos aprenderem os nomes; (3) convidar o Esp�rito com uma escritura e testemunho; (4) explicar as normas e o vestu�rio esperado; (5) perguntar como voc� pode ajud�-los a terem uma �tima semana. Aproveite tamb�m para dividir os jovens em 4 equipes para a atividade "O Cristo Vivo" do dia 4.'},
+      {time:'14h15�15h25', title:'Conhe�a sua companhia', roles:R('Dirigir','Participar, se desejar','�','Participar, se desejar'), desc:'Re�na-se com toda a companhia. Use jogos de apresenta��o, depois oriente a escolha do nome da companhia com base na escritura designada e conduza a elabora��o de metas pessoais e da companhia para a semana.'},
+      {time:'15h40�16h25', title:'Orienta��o', roles:R('Participar','Auxiliar','Dirigir','Auxiliar')},
+      {time:'16h30�16h50', title:'Tempo livre', roles:R('Participar','Participar','Dirigir','Participar, se desejar')},
+      {time:'17h�17h50', title:'Brincadeiras da noite familiar', roles:R('Dirigir','Participar','Participar','Participar, se desejar')},
+      {time:'18h�18h50', title:'Aula da noite familiar', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'19h�20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'20h45�21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h15�22h', title:'Contagem dos participantes, hora do sil�ncio etc.', roles:R('Dirigir','Receber','Receber','�')},
+      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','�')},
+      {time:'22h20�22h50', title:'Reuni�o de coordenadores/coordenadores assistentes', roles:R('Supervisionar','Auxiliar','Auxiliar','Participar, se desejar')},
+      {time:'23h', title:'Staff se recolher', roles:R('�','Supervisionar','Supervisionar','Supervisionar')}
     ]},
-    { id:'d2', name:'2º Dia', sub:'', dress:'Roupa de domingo', activities:[
-      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h30–10h30', title:'Reunião Sacramental', roles:R('Participar','Supervisionar','Dirigir','Supervisionar')},
-      {time:'10h40–11h35', title:'Escola dominical "Vem, e segue-Me"', roles:R('Ensinar','Participar','Participar','Participar')},
-      {time:'11h45–12h45', title:'Tempo disponibilizado para o family search', roles:R('Participar','Supervisionar, se designado','Supervisionar','Ensinar')},
-      {time:'13h–14h30', title:'Almoço/ensaio do programa musical', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'14h30–15h30', title:'Compartilhar o Evangelho', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
-      {time:'15h40–16h40', title:'Tempo livre', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
-      {time:'16h50–17h50', title:'Força dos jovens', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'18h–18h50', title:'Devocional com setenta/pres. de estaca', roles:R('Participar','Supervisionar, se designado','Dirigir','Participar')},
-      {time:'19h–20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'21h20–22h', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
-      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Supervisionar','Supervisionar','—')},
-      {time:'22h20–22h50', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se quiser')},
+    { id:'d2', name:'2� Dia', sub:'', dress:'Roupa de domingo', activities:[
+      {time:'7h45�8h', title:'Reuni�o de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','�','�')},
+      {time:'8h�8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','�','�')},
+      {time:'8h15�9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h30�10h30', title:'Reuni�o Sacramental', roles:R('Participar','Supervisionar','Dirigir','Supervisionar')},
+      {time:'10h40�11h35', title:'Escola dominical "Vem, e segue-Me"', roles:R('Ensinar','Participar','Participar','Participar')},
+      {time:'11h45�12h45', title:'Tempo disponibilizado para o family search', roles:R('Participar','Supervisionar, se designado','Supervisionar','Ensinar')},
+      {time:'13h�14h30', title:'Almo�o/ensaio do programa musical', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'14h30�15h30', title:'Compartilhar o Evangelho', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
+      {time:'15h40�16h40', title:'Tempo livre', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
+      {time:'16h50�17h50', title:'For�a dos jovens', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'18h�18h50', title:'Devocional com setenta/pres. de estaca', roles:R('Participar','Supervisionar, se designado','Dirigir','Participar')},
+      {time:'19h�20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'20h45�21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h20�22h', title:'Contagem dos participantes, hora do sil�ncio etc.', roles:R('Dirigir','Receber','Receber','�')},
+      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Supervisionar','Supervisionar','�')},
+      {time:'22h20�22h50', title:'Reuni�o de coordenadores e coordenadores assistentes', roles:R('�','Participar','Dirigir','Participar, se quiser')},
       {time:'23h', title:'Staff deve se recolher', roles:R('Participar','Supervisionar','Supervisionar','Supervisionar')}
     ]},
-    { id:'d3', name:'3º Dia', sub:'', dress:'Camiseta da Equipe FSY', activities:[
-      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h25–10h15', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'10h30–11h', title:'Preparação de faixas e gritos de guerra', roles:R('Participar','Dirigir','Ajudar, se necessário','Participar, se desejar')},
-      {time:'11h10–12h20', title:'Manhã de jogos e gritos de guerra', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'12h30–13h50', title:'Almoço / Ensaio do programa musical / Testes para o show de variedades', roles:R('Participar / Ajudar, se designado','Supervisionar, se designado','Participar','Participar, se desejar'), desc:'Três atividades ocorrendo em paralelo nesse intervalo: almoço, ensaio do programa musical e testes para o show de variedades.'},
-      {time:'14h–14h50', title:'Serão Vespertino do casal diretor — "Educação e autossuficiência"', roles:R('Participar','Participar','Dirigir','Ensinar')},
-      {time:'15h–15h50', title:'Atividade Viver o Evangelho', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'16h–16h40', title:'FSY Humano / Normas de etiqueta ao dançar (preparar-se para o baile)', roles:R('Participar / Dirigir','Ajudar, se designado','Dirigir','Participar'), desc:'Duas atividades em paralelo: "FSY Humano" e orientações de etiqueta para o baile.'},
-      {time:'18h–19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'19h–21h', title:'Baile + Lanche', roles:R('Ajudar, se designado','Ajudar, se designado','Dirigir','Participar')},
-      {time:'21h15–21h45', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'21h45–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
-      {time:'22h30', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
-      {time:'22h40–23h', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se desejar')},
-      {time:'23h', title:'Staff deve se recolher', roles:R('—','—','Supervisionar','Supervisionar')}
+    { id:'d3', name:'3� Dia', sub:'', dress:'Camiseta da Equipe FSY', activities:[
+      {time:'7h45�8h', title:'Reuni�o de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','�','�')},
+      {time:'8h�8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','�','�')},
+      {time:'8h15�9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h25�10h15', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'10h30�11h', title:'Prepara��o de faixas e gritos de guerra', roles:R('Participar','Dirigir','Ajudar, se necess�rio','Participar, se desejar')},
+      {time:'11h10�12h20', title:'Manh� de jogos e gritos de guerra', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'12h30�13h50', title:'Almo�o / Ensaio do programa musical / Testes para o show de variedades', roles:R('Participar / Ajudar, se designado','Supervisionar, se designado','Participar','Participar, se desejar'), desc:'Tr�s atividades ocorrendo em paralelo nesse intervalo: almo�o, ensaio do programa musical e testes para o show de variedades.'},
+      {time:'14h�14h50', title:'Ser�o Vespertino do casal diretor � "Educa��o e autossufici�ncia"', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'15h�15h50', title:'Atividade Viver o Evangelho', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'16h�16h40', title:'FSY Humano / Normas de etiqueta ao dan�ar (preparar-se para o baile)', roles:R('Participar / Dirigir','Ajudar, se designado','Dirigir','Participar'), desc:'Duas atividades em paralelo: "FSY Humano" e orienta��es de etiqueta para o baile.'},
+      {time:'18h�19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'19h�21h', title:'Baile + Lanche', roles:R('Ajudar, se designado','Ajudar, se designado','Dirigir','Participar')},
+      {time:'21h15�21h45', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h45�22h30', title:'Contagem dos participantes, hora do sil�ncio etc.', roles:R('Dirigir','Receber','Receber','�')},
+      {time:'22h30', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','�')},
+      {time:'22h40�23h', title:'Reuni�o de coordenadores e coordenadores assistentes', roles:R('�','Participar','Dirigir','Participar, se desejar')},
+      {time:'23h', title:'Staff deve se recolher', roles:R('�','�','Supervisionar','Supervisionar')}
     ]},
-    { id:'d4', name:'4º Dia', sub:'', dress:'Camiseta da Equipe FSY e Roupa de domingo', activities:[
-      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h25–9h45', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'10h–11h10', title:'Ensaio Geral do Show de Variedades / Tempo livre p/ os demais', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar, se desejar','—')},
-      {time:'11h20–11h40', title:'Show de variedades', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar','Participar')},
-      {time:'12h50–14h', title:'Almoço', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'14h–15h', title:'Serão Vespertino do casal diretor (rapazes) / Atividade "A Família" (moças)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Atividades simultâneas e separadas por gênero: rapazes com o casal diretor, moças na atividade "A Família: Proclamação ao Mundo".'},
-      {time:'15h20–16h20', title:'Serão Vespertino do casal diretor (moças) / Atividade "A Família" (rapazes)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Inversão dos grupos do horário anterior.'},
-      {time:'15h30–17h50', title:'Tempo livre dos participantes / Ensaio Geral e final do Programa Musical', roles:R('Ajudar, se designado','Dirigir ou ajudar, se designado','Participar, se possível','Participar, se possível')},
-      {time:'18h–19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'19h10–20h20', title:'Programa musical e devocional do casal diretor', roles:R('Participar','Supervisionar, se designado','Dirigir','Ensinar')},
-      {time:'20h30–21h30', title:'Convite à reverência para prestar testemunho e Reunião de testemunhos', roles:R('Dirigir','Participar, se possível','Participar, se possível','Participar, se possível')},
-      {time:'21h40–22h', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'22h–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')}
+    { id:'d4', name:'4� Dia', sub:'', dress:'Camiseta da Equipe FSY e Roupa de domingo', activities:[
+      {time:'7h45�8h', title:'Reuni�o de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','�','�')},
+      {time:'8h�8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','�','�')},
+      {time:'8h15�9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h25�9h45', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'10h�11h10', title:'Ensaio Geral do Show de Variedades / Tempo livre p/ os demais', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar, se desejar','�')},
+      {time:'11h20�11h40', title:'Show de variedades', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar','Participar')},
+      {time:'12h50�14h', title:'Almo�o', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'14h�15h', title:'Ser�o Vespertino do casal diretor (rapazes) / Atividade "A Fam�lia" (mo�as)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Atividades simult�neas e separadas por g�nero: rapazes com o casal diretor, mo�as na atividade "A Fam�lia: Proclama��o ao Mundo".'},
+      {time:'15h20�16h20', title:'Ser�o Vespertino do casal diretor (mo�as) / Atividade "A Fam�lia" (rapazes)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Invers�o dos grupos do hor�rio anterior.'},
+      {time:'15h30�17h50', title:'Tempo livre dos participantes / Ensaio Geral e final do Programa Musical', roles:R('Ajudar, se designado','Dirigir ou ajudar, se designado','Participar, se poss�vel','Participar, se poss�vel')},
+      {time:'18h�19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'19h10�20h20', title:'Programa musical e devocional do casal diretor', roles:R('Participar','Supervisionar, se designado','Dirigir','Ensinar')},
+      {time:'20h30�21h30', title:'Convite � rever�ncia para prestar testemunho e Reuni�o de testemunhos', roles:R('Dirigir','Participar, se poss�vel','Participar, se poss�vel','Participar, se poss�vel')},
+      {time:'21h40�22h', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'22h�22h30', title:'Contagem dos participantes, hora do sil�ncio etc.', roles:R('Dirigir','Receber','Receber','�')}
     ]},
-    { id:'d5', name:'5º Dia', sub:'Encerramento e saída', dress:'Camiseta da Equipe FSY', activities:[
-      {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h20–9h20', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h30–10h10', title:'Atividade "Conecte-se"', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'10h25–10h40', title:'Apresentação de slides', roles:R('Participar','Ajudar ou dirigir, se designado','Participar','Participar')},
-      {time:'10h40–11h40', title:'Devocional "O que vou levar para casa"', roles:R('Participar','Participar','Dirigir','Ensinar')},
-      {time:'11h15–12h30', title:'Refletir e Analisar em companhia', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'12h30–13h40', title:'Almoço e arrumar as malas', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'13h30', title:'Saída dos participantes', roles:R('Participar','Supervisionar, se designado','Supervisionar','—')}
+    { id:'d5', name:'5� Dia', sub:'Encerramento e sa�da', dress:'Camiseta da Equipe FSY', activities:[
+      {time:'7h45�8h', title:'Reuni�o de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','�','�')},
+      {time:'8h�8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','�','�')},
+      {time:'8h20�9h20', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'9h30�10h10', title:'Atividade "Conecte-se"', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'10h25�10h40', title:'Apresenta��o de slides', roles:R('Participar','Ajudar ou dirigir, se designado','Participar','Participar')},
+      {time:'10h40�11h40', title:'Devocional "O que vou levar para casa"', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'11h15�12h30', title:'Refletir e Analisar em companhia', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'12h30�13h40', title:'Almo�o e arrumar as malas', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'13h30', title:'Sa�da dos participantes', roles:R('Participar','Supervisionar, se designado','Supervisionar','�')}
     ]}
   ]};
 }
@@ -484,7 +484,7 @@ async function saveRoster(){ try{ await setDoc(rosterRef, state.roster); }catch(
 async function saveNeeds(){ try{ await setDoc(needsRef, {items: state.needs}); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveSchedule(){ try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 
-/* Escuta em tempo real: qualquer alteração de qualquer aparelho chega aqui sozinha,
+/* Escuta em tempo real: qualquer altera��o de qualquer aparelho chega aqui sozinha,
    sem precisar de setInterval ficando martelando o servidor. */
 function startRealtimeSync(){
   onSnapshot(rosterRef, snap=>{
@@ -512,27 +512,27 @@ const ICONS = {
 function myAccessRank(){ return state.user ? ACCESS[state.user.access].rank : 0; }
 function canManage(){ return myAccessRank() >= 2; } // coordenacao, logistica ou admin
 function isAdmin(){ return myAccessRank() >= 3; }
-// Uma necessidade encaminhada para "Logística" só aparece/pode ser gerida por quem é da Logística
-// (ou pelo administrador). Quem registrou o chamado continua enxergando o próprio chamado.
+// Uma necessidade encaminhada para "Log�stica" s� aparece/pode ser gerida por quem � da Log�stica
+// (ou pelo administrador). Quem registrou o chamado continua enxergando o pr�prio chamado.
 function canSeeNeed(n){
   if(isAdmin()) return true;
-  if(n.assignedTo==='Logística') return state.user.access==='logistica' || n.createdBy===state.user.id;
+  if(n.assignedTo==='Log�stica') return state.user.access==='logistica' || n.createdBy===state.user.id;
   return true;
 }
 function canManageNeed(n){
   if(isAdmin()) return true;
-  if(n.assignedTo==='Logística') return state.user.access==='logistica';
+  if(n.assignedTo==='Log�stica') return state.user.access==='logistica';
   return canManage();
 }
 
 function showAccountMenu(){
   const body = el('div');
-  body.innerHTML = `<div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de você até você sair.</div>`;
-  const swap = el('button','btn btn-outline btn-block','Trocar de usuário');
+  body.innerHTML = `<div class="helptext">Conectado como <b>${esc(state.user.name)}</b> (${esc(ACCESS[state.user.access].label)}). Este aparelho vai lembrar de voc� at� voc� sair.</div>`;
+  const swap = el('button','btn btn-outline btn-block','Trocar de usu�rio');
   swap.style.marginBottom = '8px';
   swap.onclick = ()=>{ showIdentityPicker(); };
   const out = el('button','btn btn-danger btn-block','Sair deste aparelho');
-  out.onclick = async ()=>{ await forgetIdentity(); state.user=null; closeSheet(); render(); toast('Você saiu'); };
+  out.onclick = async ()=>{ await forgetIdentity(); state.user=null; closeSheet(); render(); toast('Voc� saiu'); };
   body.appendChild(swap); body.appendChild(out);
   openSheet('Sua conta', body, true);
 }
@@ -541,9 +541,9 @@ function showIdentityPicker(){
   const body = document.createElement('div');
   if(isFirstRun){
     body.innerHTML = `
-      <div class="helptext">Ninguém configurado ainda. Crie a conta de administrador para começar — você poderá adicionar o resto da equipe e definir permissões depois.</div>
+      <div class="helptext">Ningu�m configurado ainda. Crie a conta de administrador para come�ar � voc� poder� adicionar o resto da equipe e definir permiss�es depois.</div>
       <div class="field"><label>Seu nome</label><input id="setupName" placeholder="Ex: Ednilson Godoy"></div>
-      <div class="field"><label>Crie um PIN de acesso (5 dígitos)</label><input id="setupPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+      <div class="field"><label>Crie um PIN de acesso (5 d�gitos)</label><input id="setupPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
       <button class="btn btn-gold btn-block" id="setupBtn">Criar conta de administrador</button>
     `;
   } else {
@@ -554,17 +554,17 @@ function showIdentityPicker(){
       row.onclick = ()=> selectIdentity(u);
       list.appendChild(row);
     });
-    body.innerHTML = `<div class="helptext">Toque no seu nome para entrar. Se você ainda não está na lista, peça para o administrador te adicionar na aba Equipe.</div>`;
+    body.innerHTML = `<div class="helptext">Toque no seu nome para entrar. Se voc� ainda n�o est� na lista, pe�a para o administrador te adicionar na aba Equipe.</div>`;
     body.appendChild(list);
   }
-  openSheet('Quem é você?', body, true);
+  openSheet('Quem � voc�?', body, true);
   if(isFirstRun){
     $('#setupBtn').onclick = async ()=>{
       const name = $('#setupName').value.trim();
       const pin = $('#setupPin').value.trim();
       if(!name){ toast('Digite seu nome'); return; }
-      if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
-      const u = {id:uid(), name, manualRole:'Casal Diretor da Sessão', access:'admin', pin};
+      if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 d�gitos'); return; }
+      const u = {id:uid(), name, manualRole:'Casal Diretor da Sess�o', access:'admin', pin};
       state.roster.users.push(u);
       await saveRoster();
       selectIdentity(u);
@@ -586,13 +586,13 @@ function selectIdentity(u){
 }
 
 /* ---------------- Lembrar identidade neste aparelho (storage local do navegador) ----------------
-   Isso é só do aparelho, não vai pro Firestore — por isso usamos localStorage.
-   Cada pessoa que abre o app no seu celular guarda só o próprio ID aqui. */
+   Isso � s� do aparelho, n�o vai pro Firestore � por isso usamos localStorage.
+   Cada pessoa que abre o app no seu celular guarda s� o pr�prio ID aqui. */
 async function rememberIdentity(u){
   try{ localStorage.setItem('fsyMyIdentity', JSON.stringify({id:u.id})); }catch(e){ /* sem problema se falhar */ }
 }
 async function forgetIdentity(){
-  try{ localStorage.removeItem('fsyMyIdentity'); }catch(e){ /* já não existia */ }
+  try{ localStorage.removeItem('fsyMyIdentity'); }catch(e){ /* j� n�o existia */ }
 }
 async function tryAutoLogin(){
   try{
@@ -601,7 +601,7 @@ async function tryAutoLogin(){
     const { id } = JSON.parse(saved);
     const u = state.roster.users.find(x=>x.id===id);
     if(u){ state.user = u; return true; }
-  }catch(e){ /* nada salvo ainda, ou erro de leitura — segue pro login normal */ }
+  }catch(e){ /* nada salvo ainda, ou erro de leitura � segue pro login normal */ }
   return false;
 }
 
@@ -631,7 +631,7 @@ function render(){
 
   // top bar
   const top = el('div','topbar');
-  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Conferência 2026</div></div></div>`;
+  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">Equipe FSY</div><div class="t2">Confer�ncia 2026</div></div></div>`;
   const chip = el('div','user-chip');
   chip.innerHTML = `<span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>`;
   chip.onclick = state.user ? showAccountMenu : showIdentityPicker;
@@ -680,7 +680,7 @@ function renderWelcome(){
       <div class="badge-mark" style="width:56px;height:56px;font-size:16px;margin:0 auto 18px auto;">FSY</div>
       <div class="display" style="font-size:22px;margin-bottom:8px;">Bem-vindo(a)</div>
       <div style="font-size:13px;color:#8a8676;line-height:1.6;max-width:300px;margin:0 auto 26px auto;">
-        Ferramenta da equipe de consultores e coordenadores para acompanhar o cronograma da sessão e centralizar pedidos e necessidades durante o acampamento.
+        Ferramenta da equipe de consultores e coordenadores para acompanhar o cronograma da sess�o e centralizar pedidos e necessidades durante o acampamento.
       </div>
     </div>`;
   const btn = el('button','btn btn-gold btn-block','Identificar-se');
@@ -692,14 +692,14 @@ function renderWelcome(){
 /* ---------------- Cronograma ---------------- */
 function youAction(roles){
   if(!state.user) return null;
-  const map = {'Consultor':'consultor','Coordenador Assistente':'coordAssist','Coordenador':'coordenador','Casal Diretor da Sessão':'casalDiretor'};
+  const map = {'Consultor':'consultor','Coordenador Assistente':'coordAssist','Coordenador':'coordenador','Casal Diretor da Sess�o':'casalDiretor'};
   const key = map[state.user.manualRole];
   return key ? roles[key] : null;
 }
 
 function renderCronograma(){
   const wrap = el('div');
-  wrap.appendChild(el('div','section-title','Programação da sessão'));
+  wrap.appendChild(el('div','section-title','Programa��o da sess�o'));
 
   const chips = el('div','daychips');
   state.schedule.days.forEach((d,i)=>{
@@ -723,7 +723,7 @@ function renderCronograma(){
       <div class="act-time">${esc(a.time)}</div>
       <div class="act-main">
         <div class="act-title${a.done?' done':''}">${esc(a.title)}</div>
-        ${youAct ? `<div class="act-you">Você: <b>${esc(youAct)}</b></div>` : ''}
+        ${youAct ? `<div class="act-you">Voc�: <b>${esc(youAct)}</b></div>` : ''}
       </div>
       <div class="check${a.done?' checked':''}">${ICONS.check}</div>
     `;
@@ -741,9 +741,9 @@ function renderCronograma(){
         <div class="matrix-item"><span class="role">Coordenador</span>${esc(a.roles.coordenador)}</div>
         <div class="matrix-item"><span class="role">Casal Diretor</span>${esc(a.roles.casalDiretor)}</div>
       </div>
-      ${a.doneBy ? `<div class="act-meta">Concluído por ${esc(a.doneBy)}</div>` : ''}
+      ${a.doneBy ? `<div class="act-meta">Conclu�do por ${esc(a.doneBy)}</div>` : ''}
     `;
-    // Somente o administrador pode editar o resumo/descrição da atividade.
+    // Somente o administrador pode editar o resumo/descri��o da atividade.
     if(isAdmin()){
       const editBtn = el('button','btn btn-ghost btn-sm','Editar atividade');
       editBtn.style.marginTop = '4px';
@@ -779,13 +779,13 @@ function openEditActivity(dayIdx, actIdx){
   const a = isNew ? {time:'',title:'',desc:'',roles:{consultor:'',coordAssist:'',coordenador:'',casalDiretor:''},done:false} : state.schedule.days[dayIdx].activities[actIdx];
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Horário</label><input id="eTime" value="${esc(a.time)}" placeholder="Ex: 9h–10h"></div>
+    <div class="field"><label>Hor�rio</label><input id="eTime" value="${esc(a.time)}" placeholder="Ex: 9h�10h"></div>
     <div class="field"><label>Atividade</label><input id="eTitle" value="${esc(a.title)}" placeholder="Nome da atividade"></div>
-    <div class="field"><label>Resumo / o que fazer nessa atividade</label><textarea id="eDesc" placeholder="Ex: pontos-chave que o consultor deve cobrir, materiais necessários, tempo sugerido...">${esc(a.desc||'')}</textarea></div>
+    <div class="field"><label>Resumo / o que fazer nessa atividade</label><textarea id="eDesc" placeholder="Ex: pontos-chave que o consultor deve cobrir, materiais necess�rios, tempo sugerido...">${esc(a.desc||'')}</textarea></div>
     <div class="field"><label>Consultor</label><input id="eR1" value="${esc(a.roles.consultor)}"></div>
     <div class="field"><label>Coordenador Assistente</label><input id="eR2" value="${esc(a.roles.coordAssist)}"></div>
     <div class="field"><label>Coordenador</label><input id="eR3" value="${esc(a.roles.coordenador)}"></div>
-    <div class="field"><label>Casal Diretor da Sessão</label><input id="eR4" value="${esc(a.roles.casalDiretor)}"></div>
+    <div class="field"><label>Casal Diretor da Sess�o</label><input id="eR4" value="${esc(a.roles.casalDiretor)}"></div>
   `;
   const btnRow = el('div'); btnRow.style.display='flex'; btnRow.style.gap='8px'; btnRow.style.marginTop='6px';
   const save = el('button','btn btn-gold','Salvar'); save.style.flex='1';
@@ -815,8 +815,8 @@ function openEditActivity(dayIdx, actIdx){
 }
 
 /* ---------------- Necessidades (helpdesk) ---------------- */
-const STATUS_LABEL = {aberto:'Aberto', andamento:'Em andamento', concluido:'Concluído'};
-const PRIO_LABEL = {baixa:'Baixa',media:'Média',alta:'Alta',urgente:'Urgente'};
+const STATUS_LABEL = {aberto:'Aberto', andamento:'Em andamento', concluido:'Conclu�do'};
+const PRIO_LABEL = {baixa:'Baixa',media:'M�dia',alta:'Alta',urgente:'Urgente'};
 
 function renderNecessidades(){
   const wrap = el('div');
@@ -831,7 +831,7 @@ function renderNecessidades(){
   });
   wrap.appendChild(filters);
 
-  // Filtro por categoria (permite isolar só os "Relato do Dia", por exemplo)
+  // Filtro por categoria (permite isolar s� os "Relato do Dia", por exemplo)
   const catFilters = el('div','filter-row');
   ['todos', ...NEED_CATEGORIES].forEach(f=>{
     const label = f==='todos' ? 'Todas categorias' : f;
@@ -847,7 +847,7 @@ function renderNecessidades(){
 
   if(list.length===0){
     const e = el('div','empty');
-    e.innerHTML = `<div class="ic">📋</div><div class="t">Nada por aqui</div><div class="s">Toque no botão + para registrar um pedido, problema, material necessário ou um relato do dia.</div>`;
+    e.innerHTML = `<div class="ic">??</div><div class="t">Nada por aqui</div><div class="s">Toque no bot�o + para registrar um pedido, problema, material necess�rio ou um relato do dia.</div>`;
     wrap.appendChild(e);
     return wrap;
   }
@@ -861,9 +861,9 @@ function renderNecessidades(){
       </div>
       <div class="need-desc">${esc(n.desc)}</div>
       <div class="need-meta">
-        <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
+        <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">? ${PRIO_LABEL[n.priority]}</span>
         <span>${esc(n.category)}</span>
-        <span>Para: ${esc(n.assignedTo||'—')}</span>
+        <span>Para: ${esc(n.assignedTo||'�')}</span>
         <span>${esc(n.createdByName)}</span>
       </div>
     `;
@@ -876,8 +876,8 @@ function renderNecessidades(){
 function openNewNeed(){
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Título</label><input id="nTitle" placeholder="Ex: Falta água no refeitório"></div>
-    <div class="field"><label>Descrição</label><textarea id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
+    <div class="field"><label>T�tulo</label><input id="nTitle" placeholder="Ex: Falta �gua no refeit�rio"></div>
+    <div class="field"><label>Descri��o</label><textarea id="nDesc" placeholder="Descreva o que est� precisando ou o problema enfrentado"></textarea></div>
     <div class="field"><label>Categoria</label>
       <div class="seg" id="nCat">
         ${NEED_CATEGORIES.map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>`).join('')}
@@ -897,11 +897,11 @@ function openNewNeed(){
   body.querySelectorAll('#nCat .seg-opt').forEach(o=> o.onclick=()=>{
     body.querySelectorAll('#nCat .seg-opt').forEach(x=>x.classList.remove('active'));
     o.classList.add('active');
-    // Se for "Relato do Dia", ajusta o texto do campo e esconde a prioridade (não faz sentido para um relato).
+    // Se for "Relato do Dia", ajusta o texto do campo e esconde a prioridade (n�o faz sentido para um relato).
     const isRelato = o.dataset.v === 'Relato do Dia';
     $('#nDesc').placeholder = isRelato
-      ? 'Conte como foi o dia: desafios, dificuldades com os jovens, sugestões para melhorar amanhã...'
-      : 'Descreva o que está precisando ou o problema enfrentado';
+      ? 'Conte como foi o dia: desafios, dificuldades com os jovens, sugest�es para melhorar amanh�...'
+      : 'Descreva o que est� precisando ou o problema enfrentado';
     $('#prioField').style.display = isRelato ? 'none' : 'block';
   });
   body.querySelectorAll('#nAssign .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#nAssign .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
@@ -914,7 +914,7 @@ function openNewNeed(){
 
   save.onclick = async ()=>{
     const title = $('#nTitle').value.trim();
-    if(!title){ toast('Digite um título'); return; }
+    if(!title){ toast('Digite um t�tulo'); return; }
     const cat = body.querySelector('#nCat .seg-opt.active').dataset.v;
     const assignedTo = body.querySelector('#nAssign .seg-opt.active').dataset.v;
     const prio = body.querySelector('#nPrio .seg-opt.active').dataset.v;
@@ -932,11 +932,11 @@ function openNeedDetail(id){
   if(!n) return;
   const body = el('div');
   body.innerHTML = `
-    <div class="need-desc" style="margin-bottom:14px;">${esc(n.desc)||'<i>Sem descrição</i>'}</div>
+    <div class="need-desc" style="margin-bottom:14px;">${esc(n.desc)||'<i>Sem descri��o</i>'}</div>
     <div class="need-meta" style="margin-bottom:18px;">
-      <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
+      <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">? ${PRIO_LABEL[n.priority]}</span>
       <span>${esc(n.category)}</span>
-      <span>Para: ${esc(n.assignedTo||'—')}</span>
+      <span>Para: ${esc(n.assignedTo||'�')}</span>
       <span>Por ${esc(n.createdByName)}</span>
       <span>${new Date(n.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
     </div>
@@ -963,19 +963,19 @@ function openNeedDetail(id){
     del.style.marginTop='16px';
     del.onclick = async ()=>{
       state.needs = state.needs.filter(x=>x.id!==id);
-      await saveNeeds(); closeSheet(); render(); toast('Excluído');
+      await saveNeeds(); closeSheet(); render(); toast('Exclu�do');
     };
     body.appendChild(del);
   } else if(n.createdBy===state.user.id){
-    const hint = el('div','helptext', n.assignedTo==='Logística'
-      ? 'Este chamado foi encaminhado para a Logística. Apenas a equipe de logística (ou o administrador) pode alterar o status. Você pode acompanhar o andamento por aqui.'
-      : 'Apenas coordenação pode alterar o status. Você pode acompanhar o andamento por aqui.');
+    const hint = el('div','helptext', n.assignedTo==='Log�stica'
+      ? 'Este chamado foi encaminhado para a Log�stica. Apenas a equipe de log�stica (ou o administrador) pode alterar o status. Voc� pode acompanhar o andamento por aqui.'
+      : 'Apenas coordena��o pode alterar o status. Voc� pode acompanhar o andamento por aqui.');
     body.appendChild(hint);
   }
   openSheet(n.title, body, true);
 }
 
-/* ---------------- Equipe (roster + permissões) ---------------- */
+/* ---------------- Equipe (roster + permiss�es) ---------------- */
 function renderEquipe(){
   const wrap = el('div');
   wrap.appendChild(el('div','section-title', isAdmin() ? `Equipe (${state.roster.users.length})` : 'Equipe'));
@@ -991,7 +991,7 @@ function renderEquipe(){
   state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
     const row = el('div','roster-row');
     row.innerHTML = `
-      <div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (você)':''}</div><div class="roster-role">${esc(u.manualRole)}</div></div>
+      <div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (voc�)':''}</div><div class="roster-role">${esc(u.manualRole)}</div></div>
       <span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>
     `;
     if(isAdmin() && u.id!==state.user.id){
@@ -1003,7 +1003,7 @@ function renderEquipe(){
   wrap.appendChild(card);
 
   if(!isAdmin()){
-    wrap.appendChild(el('div','helptext','Apenas o administrador pode editar permissões da equipe.'));
+    wrap.appendChild(el('div','helptext','Apenas o administrador pode editar permiss�es da equipe.'));
   }
   return wrap;
 }
@@ -1012,18 +1012,18 @@ function openAddMember(){
   const body = el('div');
   body.innerHTML = `
     <div class="field"><label>Nome</label><input id="mName" placeholder="Nome completo"></div>
-    <div class="field"><label>Função (manual FSY)</label>
+    <div class="field"><label>Fun��o (manual FSY)</label>
       <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
     </div>
-    <div class="field"><label>Nível de acesso no app</label>
+    <div class="field"><label>N�vel de acesso no app</label>
       <div class="seg" id="mAccess">
         <div class="seg-opt active" data-v="consultor">Consultor</div>
-        <div class="seg-opt" data-v="coordenacao">Coordenação</div>
-        <div class="seg-opt" data-v="logistica">Logística</div>
+        <div class="seg-opt" data-v="coordenacao">Coordena��o</div>
+        <div class="seg-opt" data-v="logistica">Log�stica</div>
         <div class="seg-opt" data-v="admin">Administrador</div>
       </div>
     </div>
-    <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input id="mPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+    <div class="field" id="pinField"><label>PIN de acesso (5 d�gitos)</label><input id="mPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
   `;
   body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#mAccess .seg-opt').forEach(o=> o.onclick=()=>{
@@ -1039,7 +1039,7 @@ function openAddMember(){
     const role = body.querySelector('#mRole .seg-opt.active').dataset.v;
     const access = body.querySelector('#mAccess .seg-opt.active').dataset.v;
     const pin = $('#mPin').value.trim();
-    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
+    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 d�gitos'); return; }
     state.roster.users.push({id:uid(), name, manualRole:role, access, pin});
     await saveRoster(); closeSheet(); render(); toast('Membro adicionado');
   };
@@ -1051,15 +1051,15 @@ function openEditMember(id){
   const body = el('div');
   body.innerHTML = `
     <div class="field"><label>Nome</label><input id="emName" value="${esc(u.name)}"></div>
-    <div class="field"><label>Função (manual FSY)</label>
+    <div class="field"><label>Fun��o (manual FSY)</label>
       <div class="seg" id="emRole">${MANUAL_ROLES.map(r=>`<div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
     </div>
-    <div class="field"><label>Nível de acesso no app</label>
+    <div class="field"><label>N�vel de acesso no app</label>
       <div class="seg" id="emAccess">
         ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
-    <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input id="emPin" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
+    <div class="field" id="empinField"><label>PIN de acesso (5 d�gitos)</label><input id="emPin" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
   `;
   body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#emAccess .seg-opt').forEach(o=> o.onclick=()=>{
@@ -1075,7 +1075,7 @@ function openEditMember(id){
   save.onclick = async ()=>{
     const access = body.querySelector('#emAccess .seg-opt.active').dataset.v;
     const pin = $('#emPin').value.trim();
-    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
+    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 d�gitos'); return; }
     u.name = $('#emName').value.trim() || u.name;
     u.manualRole = body.querySelector('#emRole .seg-opt.active').dataset.v;
     u.access = access; u.pin = pin;
@@ -1089,7 +1089,7 @@ function openEditMember(id){
 
 /* ---------------- Boot ---------------- */
 (async function init(){
-  $('#app').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#a39f92;font-size:13px;">Carregando…</div>';
+  $('#app').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100vh;color:#a39f92;font-size:13px;">Carregando�</div>';
   await loadAll();
   await tryAutoLogin();
   render();
