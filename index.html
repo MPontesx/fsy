@@ -527,12 +527,12 @@ const ICONS = {
 function myAccessRank(){ return state.user ? ACCESS[state.user.access].rank : 0; }
 function canManage(){ return myAccessRank() >= 2; } // coordenacao, logistica ou admin
 function isAdmin(){ return myAccessRank() >= 3; }
-// Uma necessidade encaminhada para "Logística" só aparece/pode ser gerida por quem é da Logística
-// (ou pelo administrador). Quem registrou o chamado continua enxergando o próprio chamado.
+// Chamados só aparecem pra quem tem acesso de Coordenação, Logística ou Admin
+// (Casal Diretor entra como Admin). Consultor não vê a lista — só acompanha
+// os chamados que ele mesmo registrou.
 function canSeeNeed(n){
-  if(isAdmin()) return true;
-  if(n.assignedTo==='Logística') return state.user.access==='logistica' || n.createdBy===state.user.id;
-  return true;
+  if(myAccessRank() >= 2) return true;
+  return n.createdBy === state.user.id;
 }
 function canManageNeed(n){
   if(isAdmin()) return true;
@@ -557,8 +557,8 @@ function showIdentityPicker(){
   if(isFirstRun){
     body.innerHTML = `
       <div class="helptext">Ninguém configurado ainda. Crie a conta de administrador para começar — você poderá adicionar o resto da equipe e definir permissões depois.</div>
-      <div class="field"><label>Seu nome</label><input id="setupName" placeholder="Ex: Ednilson Godoy"></div>
-      <div class="field"><label>Crie um PIN de acesso (5 dígitos)</label><input id="setupPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+      <div class="field"><label>Seu nome</label><input autocomplete="off" id="setupName" placeholder="Ex: Ednilson Godoy"></div>
+      <div class="field"><label>Crie um PIN de acesso (5 dígitos)</label><input autocomplete="off" id="setupPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
       <button class="btn btn-gold btn-block" id="setupBtn">Criar conta de administrador</button>
     `;
   } else {
@@ -589,7 +589,7 @@ function showIdentityPicker(){
 function selectIdentity(u){
   if(u.pin){
     const body = el('div');
-    body.innerHTML = `<div class="field"><label>PIN de acesso</label><input id="pinInput" inputmode="numeric" maxlength="5" placeholder="00000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
+    body.innerHTML = `<div class="field"><label>PIN de acesso</label><input autocomplete="off" id="pinInput" inputmode="numeric" maxlength="5" placeholder="00000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
     openSheet('Confirme seu PIN', body, true);
     $('#pinBtn').onclick = async ()=>{
       if($('#pinInput').value.trim() === u.pin){ closeSheet(); state.user = u; await rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!'); }
@@ -799,12 +799,12 @@ function openEditActivity(dayIdx, actIdx){
   const info = a.info || {pagManual:'',pagManualJovem:'',quemParticipa:''};
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Horário</label><input id="eTime" value="${esc(a.time)}" placeholder="Ex: 9h–10h"></div>
-    <div class="field"><label>Atividade</label><input id="eTitle" value="${esc(a.title)}" placeholder="Nome da atividade"></div>
-    <div class="field"><label>Designações (bloco principal)</label><textarea id="eDesc" placeholder="Ex: pontos-chave que o consultor deve cobrir, materiais necessários, tempo sugerido...">${esc(a.desc||'')}</textarea></div>
-    <div class="field"><label>Pág. do Manual</label><input id="eInfo1" value="${esc(info.pagManual||'')}" placeholder="Ex: pág. 12"></div>
-    <div class="field"><label>Pág. Manual Jovem</label><input id="eInfo2" value="${esc(info.pagManualJovem||'')}" placeholder="Ex: pág. 8"></div>
-    <div class="field"><label>Quem participa</label><input id="eInfo3" value="${esc(info.quemParticipa||'')}" placeholder="Ex: Todos / Consultores"></div>
+    <div class="field"><label>Horário</label><input autocomplete="off" id="eTime" value="${esc(a.time)}" placeholder="Ex: 9h–10h"></div>
+    <div class="field"><label>Atividade</label><input autocomplete="off" id="eTitle" value="${esc(a.title)}" placeholder="Nome da atividade"></div>
+    <div class="field"><label>Designações (bloco principal)</label><textarea autocomplete="off" id="eDesc" placeholder="Ex: pontos-chave que o consultor deve cobrir, materiais necessários, tempo sugerido...">${esc(a.desc||'')}</textarea></div>
+    <div class="field"><label>Pág. do Manual</label><input autocomplete="off" id="eInfo1" value="${esc(info.pagManual||'')}" placeholder="Ex: pág. 12"></div>
+    <div class="field"><label>Pág. Manual Jovem</label><input autocomplete="off" id="eInfo2" value="${esc(info.pagManualJovem||'')}" placeholder="Ex: pág. 8"></div>
+    <div class="field"><label>Quem participa</label><input autocomplete="off" id="eInfo3" value="${esc(info.quemParticipa||'')}" placeholder="Ex: Todos / Consultores"></div>
   `;
   const btnRow = el('div'); btnRow.style.display='flex'; btnRow.style.gap='8px'; btnRow.style.marginTop='6px';
   const save = el('button','btn btn-gold','Salvar'); save.style.flex='1';
@@ -897,8 +897,8 @@ function renderNecessidades(){
 function openNewNeed(){
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Título</label><input id="nTitle" placeholder="Ex: Solicitação de Material"></div>
-    <div class="field"><label>Descrição</label><textarea id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
+    <div class="field"><label>Título</label><input autocomplete="off" id="nTitle" placeholder="Ex: Solicitação de Material"></div>
+    <div class="field"><label>Descrição</label><textarea autocomplete="off" id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
     <div class="field"><label>Categoria</label>
       <div class="seg" id="nCat">
         ${NEED_CATEGORIES.map((c,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${c}">${c}</div>`).join('')}
@@ -963,9 +963,9 @@ function openNeedDetail(id){
       <span>${new Date(n.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
     </div>
   `;
-  // Combinado: qualquer pessoa da equipe pode assumir um chamado da Logística,
-  // menos quem tem acesso de Consultor (rank 1).
-  if(n.assignedTo==='Logística' && myAccessRank() >= 2){
+  // Combinado: qualquer pessoa da equipe (menos Consultor) pode assumir
+  // qualquer chamado, não só os encaminhados pra Logística.
+  if(myAccessRank() >= 2){
     const claimWrap = el('div'); claimWrap.style.marginBottom = '16px';
     if(n.claimedBy){
       const info = el('div','helptext', `Responsável: <b>${esc(n.claimedByName)}</b>`);
@@ -1067,7 +1067,7 @@ function renderEquipe(){
 function openAddMember(){
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Nome</label><input id="mName" placeholder="Nome completo"></div>
+    <div class="field"><label>Nome</label><input autocomplete="off" id="mName" placeholder="Nome completo"></div>
     <div class="field"><label>Função (manual FSY)</label>
       <div class="seg" id="mRole">${MANUAL_ROLES.map((r,i)=>`<div class="seg-opt${i===0?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
     </div>
@@ -1079,7 +1079,7 @@ function openAddMember(){
         <div class="seg-opt" data-v="admin">Administrador</div>
       </div>
     </div>
-    <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input id="mPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+    <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="off" id="mPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
   `;
   body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#mAccess .seg-opt').forEach(o=> o.onclick=()=>{
@@ -1106,7 +1106,7 @@ function openEditMember(id){
   if(!u) return;
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Nome</label><input id="emName" value="${esc(u.name)}"></div>
+    <div class="field"><label>Nome</label><input autocomplete="off" id="emName" value="${esc(u.name)}"></div>
     <div class="field"><label>Função (manual FSY)</label>
       <div class="seg" id="emRole">${MANUAL_ROLES.map(r=>`<div class="seg-opt${u.manualRole===r?' active':''}" data-v="${r}">${r}</div>`).join('')}</div>
     </div>
@@ -1115,7 +1115,7 @@ function openEditMember(id){
         ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
-    <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input id="emPin" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
+    <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="off" id="emPin" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
   `;
   body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#emAccess .seg-opt').forEach(o=> o.onclick=()=>{
