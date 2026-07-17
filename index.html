@@ -897,7 +897,7 @@ function renderNecessidades(){
 function openNewNeed(){
   const body = el('div');
   body.innerHTML = `
-    <div class="field"><label>Título</label><input autocomplete="off" id="nTitle" placeholder="Ex: Solicitação de Material"></div>
+    <div class="field"><label>Título</label><input autocomplete="off" id="needTitleF" placeholder="Ex: Solicitação de Material"></div>
     <div class="field"><label>Descrição</label><textarea autocomplete="off" id="nDesc" placeholder="Descreva o que está precisando ou o problema enfrentado"></textarea></div>
     <div class="field"><label>Categoria</label>
       <div class="seg" id="nCat">
@@ -934,7 +934,7 @@ function openNewNeed(){
   openSheet('Nova necessidade / relato', body, true);
 
   save.onclick = async ()=>{
-    const title = $('#nTitle').value.trim();
+    const title = $('#needTitleF').value.trim();
     if(!title){ toast('Digite um título'); return; }
     const cat = body.querySelector('#nCat .seg-opt.active').dataset.v;
     const assignedTo = body.querySelector('#nAssign .seg-opt.active').dataset.v;
