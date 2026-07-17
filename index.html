@@ -558,7 +558,7 @@ function showIdentityPicker(){
     body.innerHTML = `
       <div class="helptext">Ninguém configurado ainda. Crie a conta de administrador para começar — você poderá adicionar o resto da equipe e definir permissões depois.</div>
       <div class="field"><label>Seu nome</label><input autocomplete="off" id="setupName" placeholder="Ex: Ednilson Godoy"></div>
-      <div class="field"><label>Crie um PIN de acesso (5 dígitos)</label><input autocomplete="off" id="setupPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+      <div class="field"><label>Crie um PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="setupPin" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div>
       <button class="btn btn-gold btn-block" id="setupBtn">Criar conta de administrador</button>
     `;
   } else {
@@ -589,7 +589,7 @@ function showIdentityPicker(){
 function selectIdentity(u){
   if(u.pin){
     const body = el('div');
-    body.innerHTML = `<div class="field"><label>PIN de acesso</label><input autocomplete="off" id="pinInput" inputmode="numeric" maxlength="5" placeholder="00000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
+    body.innerHTML = `<div class="field"><label>PIN de acesso</label><input autocomplete="one-time-code" id="pinInput" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div><button class="btn btn-gold btn-block" id="pinBtn">Entrar</button>`;
     openSheet('Confirme seu PIN', body, true);
     $('#pinBtn').onclick = async ()=>{
       if($('#pinInput').value.trim() === u.pin){ closeSheet(); state.user = u; await rememberIdentity(u); render(); toast('Bem-vindo(a), '+u.name.split(' ')[0]+'!'); }
@@ -1079,7 +1079,7 @@ function openAddMember(){
         <div class="seg-opt" data-v="admin">Administrador</div>
       </div>
     </div>
-    <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="off" id="mPin" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+    <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="mPin" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div>
   `;
   body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#mAccess .seg-opt').forEach(o=> o.onclick=()=>{
@@ -1115,7 +1115,7 @@ function openEditMember(id){
         ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
-    <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="off" id="emPin" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
+    <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="emPin" type="password" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
   `;
   body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
   body.querySelectorAll('#emAccess .seg-opt').forEach(o=> o.onclick=()=>{
