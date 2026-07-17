@@ -1,6 +1,6 @@
 {
-  "name": "Equipe FSY",
-  "short_name": "Equipe FSY",
+  "name": "FSY RECIFE NORTE",
+  "short_name": "FSY RECIFE NORTE",
   "description": "Ferramenta da equipe de consultores e coordenadores para acompanhar o cronograma da sessão e centralizar pedidos e necessidades durante o acampamento.",
   "start_url": "./index.html",
   "scope": "./",
