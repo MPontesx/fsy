@@ -963,9 +963,9 @@ function openNeedDetail(id){
       <span>${new Date(n.createdAt).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
     </div>
   `;
-  // Chamados encaminhados para a Logística podem ser "assumidos" por alguém da equipe,
-  // pra deixar claro quem já está cuidando, sem tirar a visibilidade dos demais.
-  if(n.assignedTo==='Logística' && canManageNeed(n)){
+  // Combinado: qualquer pessoa da equipe pode assumir um chamado da Logística,
+  // menos quem tem acesso de Consultor (rank 1).
+  if(n.assignedTo==='Logística' && myAccessRank() >= 2){
     const claimWrap = el('div'); claimWrap.style.marginBottom = '16px';
     if(n.claimedBy){
       const info = el('div','helptext', `Responsável: <b>${esc(n.claimedByName)}</b>`);
