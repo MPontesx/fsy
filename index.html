@@ -225,6 +225,19 @@ body{
 .prio-alta{color:var(--gold-deep);}
 .need-desc{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45;}
 .need-meta{font-size:10.5px;color:var(--muted);margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;}
+/* Card de chamado que EU assumi: fica destacado pra não esquecer */
+.need-card.mine{
+  border:1.5px solid var(--gold);
+  background:#FFFCF2;
+  box-shadow:0 0 0 3px rgba(255,199,58,0.18);
+}
+.mine-strip{
+  display:flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:800;color:#8a6a00;
+  background:#FFF3C4;padding:5px 10px;margin:-14px -14px 10px -14px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  text-transform:uppercase;letter-spacing:0.03em;
+}
 
 .fab{
   position:absolute;right:16px;bottom:84px;z-index:25;
@@ -285,10 +298,17 @@ body{
 .roster-name{font-weight:700;font-size:13.5px;}
 .roster-role{font-size:11px;color:var(--muted);margin-top:1px;}
 .lvl-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
-.lvl-admin{background:#FFF0C2;color:var(--gold-deep);}
-.lvl-coordenacao{background:#e2e8e3;color:var(--green);}
-.lvl-logistica{background:#DCEBF8;color:var(--black);}
-.lvl-consultor{background:var(--soft2);color:var(--ink-soft);}
+/* Cores de acesso: Consultor=amarelo, Coordenação=azul claro, Administrador=azul marinho, Logística=verde claro */
+.lvl-admin{background:var(--ink);color:#fff;}
+.lvl-coordenacao{background:#DCEBF8;color:#265a82;}
+.lvl-logistica{background:#DFF3E1;color:var(--green);}
+.lvl-consultor{background:#FFF3C4;color:#8a6a00;}
+
+/* Seg-opt coloridos para seleção de nível de acesso */
+.seg-opt.acc-consultor.active{background:#FFC73A;color:#4a3b00;}
+.seg-opt.acc-coordenacao.active{background:#8FC1E8;color:#12324a;}
+.seg-opt.acc-admin.active{background:var(--ink);color:#fff;}
+.seg-opt.acc-logistica.active{background:#8FDCA0;color:#1c4326;}
 
 .toast{
   position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
@@ -873,8 +893,10 @@ function renderNecessidades(){
   }
 
   list.forEach(n=>{
-    const card = el('div','card need-card');
+    const isMine = n.claimedBy && state.user && n.claimedBy===state.user.id;
+    const card = el('div','card need-card'+(isMine?' mine':''));
     card.innerHTML = `
+      ${isMine ? `<div class="mine-strip">⭐ Você assumiu — pendente de conclusão</div>` : ''}
       <div class="need-top">
         <div class="need-title">${esc(n.title)}</div>
         <span class="tag tag-${n.status}">${STATUS_LABEL[n.status]}</span>
@@ -885,7 +907,7 @@ function renderNecessidades(){
         <span>${esc(n.category)}</span>
         <span>Para: ${esc(n.assignedTo||'—')}</span>
         <span>${esc(n.createdByName)}</span>
-        ${n.claimedByName ? `<span>Responsável: ${esc(n.claimedByName)}</span>` : ''}
+        ${n.claimedByName ? `<span>${isMine?'<b>Responsável: Você</b>':'Responsável: '+esc(n.claimedByName)}</span>` : ''}
       </div>
     `;
     card.onclick = ()=> openNeedDetail(n.id);
@@ -968,7 +990,9 @@ function openNeedDetail(id){
   if(myAccessRank() >= 2){
     const claimWrap = el('div'); claimWrap.style.marginBottom = '16px';
     if(n.claimedBy){
-      const info = el('div','helptext', `Responsável: <b>${esc(n.claimedByName)}</b>`);
+      const info = el('div','helptext', n.claimedBy===state.user.id
+        ? `⭐ <b>Você é o responsável</b> por este chamado.`
+        : `Responsável: <b>${esc(n.claimedByName)}</b>`);
       claimWrap.appendChild(info);
       if(n.claimedBy===state.user.id){
         const release = el('button','btn btn-outline btn-block','Deixar de ser responsável');
@@ -1073,10 +1097,10 @@ function openAddMember(){
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="mAccess">
-        <div class="seg-opt active" data-v="consultor">Consultor</div>
-        <div class="seg-opt" data-v="coordenacao">Coordenação</div>
-        <div class="seg-opt" data-v="logistica">Logística</div>
-        <div class="seg-opt" data-v="admin">Administrador</div>
+        <div class="seg-opt acc-consultor active" data-v="consultor">Consultor</div>
+        <div class="seg-opt acc-coordenacao" data-v="coordenacao">Coordenação</div>
+        <div class="seg-opt acc-logistica" data-v="logistica">Logística</div>
+        <div class="seg-opt acc-admin" data-v="admin">Administrador</div>
       </div>
     </div>
     <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="mPin" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div>
@@ -1112,7 +1136,7 @@ function openEditMember(id){
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="emAccess">
-        ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
+        ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt acc-${a}${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
     <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="emPin" type="password" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
