@@ -364,6 +364,18 @@ const ACCESS = {
 // Adicionado 'Logística' como uma função de equipe (roster), igual às demais.
 const MANUAL_ROLES = ['Consultor','Coordenador','CA`S','Casal Diretor','Logística'];
 
+// Ordem de exibição da equipe: Administrador, Logística, Coordenador, CA'S, Consultor —
+// e dentro de cada grupo, ordem alfabética por nome.
+function rosterGroupRank(u){
+  if(u.access==='admin') return 0;
+  if(u.access==='logistica') return 1;
+  if(u.access==='coordenacao') return u.manualRole==='CA`S' ? 3 : 2;
+  return 4; // consultor
+}
+function sortRoster(list){
+  return list.slice().sort((a,b)=> rosterGroupRank(a)-rosterGroupRank(b) || a.name.localeCompare(b.name,'pt-BR'));
+}
+
 // Para quem uma necessidade pode ser encaminhada.
 const ASSIGN_TARGETS = ['Casal Diretor','Coordenador','Logística'];
 // Categorias de necessidade — 'Relato do Dia' é a nova categoria de feedback/observações.
@@ -583,7 +595,7 @@ function showIdentityPicker(){
     `;
   } else {
     const list = el('div');
-    state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
+    sortRoster(state.roster.users).forEach(u=>{
       const row = el('div','pick-row');
       row.innerHTML = `<div><div class="roster-name">${esc(u.name)}</div><div class="roster-role">${esc(u.manualRole)}</div></div><span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>`;
       row.onclick = ()=> selectIdentity(u);
@@ -1068,7 +1080,7 @@ function renderEquipe(){
   }
 
   const card = el('div','card');
-  state.roster.users.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(u=>{
+  sortRoster(state.roster.users).forEach(u=>{
     const row = el('div','roster-row');
     row.innerHTML = `
       <div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (você)':''}</div><div class="roster-role">${esc(u.manualRole)}</div></div>
