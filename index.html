@@ -48,12 +48,13 @@ body{
 #app{
   width:100%;
   max-width:480px;
-  min-height:100vh;
-  min-height:100dvh;
+  height:100vh;
+  height:100dvh;
   background:var(--paper);
   display:flex;
   flex-direction:column;
   position:relative;
+  overflow:hidden;
 }
 .display{font-family:'Archivo Black','Inter',sans-serif; letter-spacing:-0.02em;}
 
@@ -337,7 +338,7 @@ body{
    ============================================================ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, getDocs, setDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCnKe8i0aXn9ZresRun2LfqRay4TEG4szU",
@@ -354,6 +355,10 @@ const db = getFirestore(firebaseApp);
 const rosterRef   = doc(db, 'fsyEquipe', 'roster');
 const needsRef    = doc(db, 'fsyEquipe', 'needs');
 const scheduleRef = doc(db, 'fsyEquipe', 'schedule');
+// Jovens fica numa coleção de verdade (um documento por jovem), diferente das outras
+// "gavetas" acima — assim o check-in do dia 1 não precisa reescrever a lista inteira
+// toda vez que alguém marca presença, e cada edição é isolada por jovem.
+const jovensCol = collection(db, 'jovens');
 
 const ACCESS = {
   admin:        {label:'Administrador', rank:3},
@@ -386,12 +391,27 @@ let state = {
   roster:{users:[]},
   needs:[],
   schedule:null,
+  jovens:[],            // [{id, consultorId, nome, nascimento, telefone, alergias, checkedIn, checkedInAt, flagged, flagNote}]
   tab:'cronograma',
   day:0,
   needFilter:'todos',
   needCatFilter:'todos',
+  jovensSearch:'',
   loaded:false
 };
+
+// Helpers de equipe/supervisão
+function getCAs(){ return state.roster.users.filter(u=>u.manualRole==="CA`S"); }
+function getConsultores(){ return state.roster.users.filter(u=>u.manualRole==='Consultor'); }
+function myConsultores(){ return getConsultores().filter(c=>c.supervisorId===state.user.id); }
+function isCA(){ return state.user && state.user.manualRole==="CA`S"; }
+function isConsultorRole(){ return state.user && state.user.manualRole==='Consultor'; }
+function jovensDoConsultor(consultorId){ return state.jovens.filter(j=>j.consultorId===consultorId); }
+function cronogramaProgress(userId){
+  let total=0, done=0;
+  (state.schedule?.days||[]).forEach(d=> d.activities.forEach(a=>{ total++; if((a.doneUsers||[]).includes(userId)) done++; }));
+  return {done, total};
+}
 
 const $ = sel => document.querySelector(sel);
 const el = (tag, cls, html) => { const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; };
@@ -524,12 +544,31 @@ async function loadAll(){
       await setDoc(scheduleRef, state.schedule);
     }
   }catch(e){ state.schedule = defaultSchedule(); }
+  try{
+    const snap = await getDocs(jovensCol);
+    state.jovens = snap.docs.map(d=>({id:d.id, ...d.data()}));
+  }catch(e){ state.jovens = []; }
 
   state.loaded = true;
 }
 async function saveRoster(){ try{ await setDoc(rosterRef, state.roster); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveNeeds(){ try{ await setDoc(needsRef, {items: state.needs}); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveSchedule(){ try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+
+/* Jovens: cada um é um documento próprio (não um array gigante), então check-in
+   e flag de um jovem nunca colidem com a edição de outro jovem ao mesmo tempo. */
+async function addJovem(data){
+  try{ await addDoc(jovensCol, {...data, checkedIn:false, checkedInAt:null, flagged:false, flagNote:'', createdAt:Date.now()}); }
+  catch(e){ toast('Erro ao salvar. Tente novamente.'); }
+}
+async function updateJovem(id, fields){
+  try{ await updateDoc(doc(db,'jovens',id), fields); }
+  catch(e){ toast('Erro ao salvar. Tente novamente.'); }
+}
+async function deleteJovem(id){
+  try{ await deleteDoc(doc(db,'jovens',id)); }
+  catch(e){ toast('Erro ao excluir. Tente novamente.'); }
+}
 
 /* Escuta em tempo real: qualquer alteração de qualquer aparelho chega aqui sozinha,
    sem precisar de setInterval ficando martelando o servidor. */
@@ -543,6 +582,9 @@ function startRealtimeSync(){
   onSnapshot(scheduleRef, snap=>{
     if(snap.exists()){ state.schedule = snap.data(); render(); }
   }, err=>console.warn('sync schedule:', err));
+  onSnapshot(jovensCol, snap=>{
+    state.jovens = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
+  }, err=>console.warn('sync jovens:', err));
 }
 
 /* ---------------- Icons ---------------- */
@@ -552,7 +594,11 @@ const ICONS = {
   users:'<svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
   check:'<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
   x:'<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
-  plus:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
+  plus:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  smile:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+  shield:'<svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>',
+  search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  flag:'<svg viewBox="0 0 24 24"><path d="M4 21V4"/><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1"/></svg>'
 };
 
 /* ---------------- Identity ---------------- */
@@ -694,10 +740,18 @@ function render(){
     if(state.tab==='cronograma') content.appendChild(renderCronograma());
     if(state.tab==='necessidades') content.appendChild(renderNecessidades());
     if(state.tab==='equipe') content.appendChild(renderEquipe());
+    if(state.tab==='meusjovens') content.appendChild(renderMeusJovens());
+    if(state.tab==='minhaequipe') content.appendChild(renderMinhaEquipe());
+    if(state.tab==='jovens') content.appendChild(renderJovensAdmin());
 
     if(state.tab==='necessidades'){
       const fab = el('button','fab',ICONS.plus);
       fab.onclick = openNewNeed;
+      app.appendChild(fab);
+    }
+    if(state.tab==='jovens' && isAdmin()){
+      const fab = el('button','fab',ICONS.plus);
+      fab.onclick = openAddJovem;
       app.appendChild(fab);
     }
   }
@@ -710,6 +764,16 @@ function render(){
       {id:'necessidades', label:'Necessidades', icon:ICONS.list},
       {id:'equipe', label:'Equipe', icon:ICONS.users}
     ];
+    // Aba extra depende do papel da pessoa:
+    // Consultor -> só os próprios jovens; CA -> visão dos consultores que supervisiona;
+    // Admin/Coordenação/Logística -> visão geral de todos os jovens (com cadastro pelo admin).
+    if(isConsultorRole()){
+      tabs.push({id:'meusjovens', label:'Meus Jovens', icon:ICONS.smile});
+    } else if(isCA()){
+      tabs.push({id:'minhaequipe', label:'Minha Equipe', icon:ICONS.shield});
+    } else if(myAccessRank() >= 2){
+      tabs.push({id:'jovens', label:'Jovens', icon:ICONS.smile});
+    }
     tabs.forEach(t=>{
       const b = el('button','navbtn'+(state.tab===t.id?' active':''));
       b.innerHTML = `<span class="ic">${t.icon}</span>${t.label}`;
@@ -1067,6 +1131,259 @@ function openNeedDetail(id){
   openSheet(n.title, body, true);
 }
 
+/* ---------------- Jovens: linha reutilizável ---------------- */
+function jovemRow(j, opts){
+  const row = el('div','roster-row');
+  const meta = [];
+  if(j.nascimento) meta.push(j.nascimento);
+  if(j.telefone) meta.push(j.telefone);
+  if(j.alergias) meta.push('⚠ '+j.alergias);
+
+  const left = el('div');
+  left.style.minWidth='0'; left.style.flex='1';
+  left.innerHTML = `
+    <div class="roster-name">${esc(j.nome)}${j.flagged?' 🚩':''}</div>
+    <div class="roster-role">${esc(meta.join(' • ')||'—')}</div>
+    ${j.flagged && j.flagNote ? `<div class="roster-role" style="color:var(--red);margin-top:2px;">${esc(j.flagNote)}</div>` : ''}
+  `;
+  row.appendChild(left);
+
+  const right = el('div'); right.style.display='flex'; right.style.alignItems='center'; right.style.gap='8px'; right.style.flexShrink='0';
+  if(opts.checkin){
+    const chk = el('div','check'+(j.checkedIn?' checked':''), ICONS.check);
+    chk.onclick = (e)=>{ e.stopPropagation(); updateJovem(j.id, {checkedIn:!j.checkedIn, checkedInAt: !j.checkedIn?Date.now():null}); };
+    right.appendChild(chk);
+  } else if(j.checkedIn){
+    right.appendChild(el('span','tag tag-concluido','✓'));
+  }
+  row.appendChild(right);
+
+  if(opts.flag || opts.edit){
+    row.style.cursor='pointer';
+    row.onclick = ()=> openJovemDetail(j.id, opts);
+  }
+  return row;
+}
+
+function openJovemDetail(id, opts){
+  const j = state.jovens.find(x=>x.id===id);
+  if(!j) return;
+  const consultor = state.roster.users.find(u=>u.id===j.consultorId);
+  const body = el('div');
+  body.innerHTML = `
+    <div class="helptext">Consultor: <b>${esc(consultor?consultor.name:'—')}</b></div>
+    <div class="need-meta" style="margin-bottom:16px;">
+      ${j.nascimento?`<span>🎂 ${esc(j.nascimento)}</span>`:''}
+      ${j.telefone?`<span>📞 ${esc(j.telefone)}</span>`:''}
+      ${j.alergias?`<span>⚠ ${esc(j.alergias)}</span>`:''}
+    </div>
+  `;
+
+  if(opts.checkin || opts.flag){
+    const actionsWrap = el('div'); actionsWrap.style.marginBottom='14px';
+    if(opts.checkin){
+      const chkBtn = el('button','btn btn-block '+(j.checkedIn?'btn-outline':'btn-gold'), j.checkedIn?'Desfazer check-in':'Fazer check-in');
+      chkBtn.style.marginBottom='8px';
+      chkBtn.onclick = async ()=>{ await updateJovem(j.id, {checkedIn:!j.checkedIn, checkedInAt: !j.checkedIn?Date.now():null}); closeSheet(); toast(j.checkedIn?'Check-in desfeito':'Check-in feito'); };
+      actionsWrap.appendChild(chkBtn);
+    }
+    if(opts.flag){
+      const flagBtn = el('button','btn btn-block '+(j.flagged?'btn-danger':'btn-outline'), j.flagged?'Remover atenção especial':'Marcar atenção especial');
+      flagBtn.onclick = ()=>{
+        if(j.flagged){ updateJovem(j.id, {flagged:false, flagNote:''}); closeSheet(); toast('Removido'); }
+        else openFlagNote(j);
+      };
+      actionsWrap.appendChild(flagBtn);
+    }
+    body.appendChild(actionsWrap);
+  }
+
+  if(opts.edit){
+    const editBtn = el('button','btn btn-outline btn-block','Editar dados');
+    editBtn.style.marginBottom='8px';
+    editBtn.onclick = ()=> openEditJovem(j.id);
+    body.appendChild(editBtn);
+    const delBtn = el('button','btn btn-danger btn-block','Excluir jovem');
+    delBtn.onclick = async ()=>{ await deleteJovem(j.id); closeSheet(); toast('Jovem removido'); };
+    body.appendChild(delBtn);
+  }
+
+  openSheet(j.nome, body, true);
+}
+
+function openFlagNote(j){
+  const body = el('div');
+  body.innerHTML = `<div class="field"><label>Observação (opcional)</label><textarea autocomplete="off" id="flagNoteInput" placeholder="Ex: precisa de atenção redobrada durante as atividades">${esc(j.flagNote||'')}</textarea></div>`;
+  const save = el('button','btn btn-gold btn-block','Salvar');
+  body.appendChild(save);
+  openSheet('Atenção especial — '+j.nome, body, true);
+  save.onclick = async ()=>{
+    await updateJovem(j.id, {flagged:true, flagNote: document.getElementById('flagNoteInput').value.trim()});
+    closeSheet(); toast('Marcado');
+  };
+}
+
+/* ---------------- Meus Jovens (Consultor) ---------------- */
+function renderMeusJovens(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title','Meus Jovens'));
+  const mine = jovensDoConsultor(state.user.id).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+  if(mine.length===0){
+    const e = el('div','empty');
+    e.innerHTML = `<div class="ic">🧒</div><div class="t">Nenhum jovem cadastrado ainda</div><div class="s">Peça para o administrador cadastrar os jovens da sua companhia. Assim que forem adicionados, eles aparecem aqui.</div>`;
+    wrap.appendChild(e);
+    return wrap;
+  }
+  wrap.appendChild(el('div','helptext','Marque o check-in conforme cada jovem chegar no dia 1. Se algum precisar de atenção especial, toque no nome dele.'));
+  const card = el('div','card');
+  mine.forEach(j=> card.appendChild(jovemRow(j, {checkin:true, flag:true, edit:false})));
+  wrap.appendChild(card);
+  return wrap;
+}
+
+/* ---------------- Minha Equipe (Coordenador Assistente) ---------------- */
+function renderMinhaEquipe(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title','Minha Equipe'));
+  const meus = myConsultores().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  if(meus.length===0){
+    const e = el('div','empty');
+    e.innerHTML = `<div class="ic">🤝</div><div class="t">Nenhum consultor atribuído a você ainda</div><div class="s">Peça para o administrador vincular os consultores que você supervisiona, na aba Equipe.</div>`;
+    wrap.appendChild(e);
+    return wrap;
+  }
+  meus.forEach(c=>{
+    const card = el('div','card card-pad');
+    const prog = cronogramaProgress(c.id);
+    const jovensList = jovensDoConsultor(c.id).sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR'));
+    const flaggedCount = jovensList.filter(j=>j.flagged).length;
+    const head = el('div');
+    head.style.cssText='display:flex;justify-content:space-between;align-items:center;cursor:pointer;';
+    head.innerHTML = `
+      <div>
+        <div class="roster-name">${esc(c.name)}</div>
+        <div class="roster-role">Cronograma: ${prog.done}/${prog.total} • Jovens: ${jovensList.length}${flaggedCount?` • 🚩 ${flaggedCount}`:''}</div>
+      </div>
+    `;
+    const body = el('div'); body.style.display='none'; body.style.marginTop='12px';
+    if(jovensList.length===0){
+      body.appendChild(el('div','helptext','Nenhum jovem cadastrado ainda para este consultor.'));
+    } else {
+      jovensList.forEach(j=> body.appendChild(jovemRow(j, {checkin:false, flag:false, edit:false})));
+    }
+    head.onclick = ()=>{ body.style.display = body.style.display==='none' ? 'block':'none'; };
+    card.appendChild(head); card.appendChild(body);
+    wrap.appendChild(card);
+  });
+  return wrap;
+}
+
+/* ---------------- Jovens (Admin / Coordenação / Logística) ---------------- */
+function renderJovensAdmin(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title',`Jovens (${state.jovens.length})`));
+
+  const searchWrap = el('div','field'); searchWrap.style.marginBottom='6px';
+  searchWrap.innerHTML = `<input autocomplete="off" id="jovensSearchInput" placeholder="Buscar jovem por nome..." value="${esc(state.jovensSearch)}">`;
+  wrap.appendChild(searchWrap);
+
+  if(!isAdmin()){
+    wrap.appendChild(el('div','helptext','Você pode fazer check-in e marcar atenção especial. Apenas o administrador cadastra, edita ou exclui jovens.'));
+  }
+
+  let list = state.jovens.slice();
+  if(state.jovensSearch.trim()){
+    const q = state.jovensSearch.trim().toLowerCase();
+    list = list.filter(j=> (j.nome||'').toLowerCase().includes(q));
+  }
+
+  if(list.length===0){
+    const e = el('div','empty');
+    e.innerHTML = `<div class="ic">🧒</div><div class="t">Nenhum jovem encontrado</div><div class="s">${state.jovens.length===0?'Toque no botão + para cadastrar o primeiro jovem.':'Tente outro termo de busca.'}</div>`;
+    wrap.appendChild(e);
+  } else {
+    const groups = {};
+    list.forEach(j=>{ const key = j.consultorId || '__sem__'; (groups[key] = groups[key]||[]).push(j); });
+    const consultorNome = id => { const c = state.roster.users.find(u=>u.id===id); return c ? c.name : 'Sem consultor definido'; };
+    const groupKeys = Object.keys(groups).sort((a,b)=> consultorNome(a).localeCompare(consultorNome(b),'pt-BR'));
+    groupKeys.forEach(gid=>{
+      wrap.appendChild(el('div','section-title', consultorNome(gid)));
+      const card = el('div','card');
+      groups[gid].sort((a,b)=>a.nome.localeCompare(b.nome,'pt-BR')).forEach(j=> card.appendChild(jovemRow(j, {checkin:canManage(), flag:canManage(), edit:isAdmin()})));
+      wrap.appendChild(card);
+    });
+  }
+
+  setTimeout(()=>{
+    const input = document.getElementById('jovensSearchInput');
+    if(input){
+      input.oninput = ()=>{
+        state.jovensSearch = input.value; render();
+        setTimeout(()=>{ const i2=document.getElementById('jovensSearchInput'); if(i2){ i2.focus(); i2.selectionStart=i2.selectionEnd=i2.value.length; } },0);
+      };
+    }
+  },0);
+
+  return wrap;
+}
+
+function openAddJovem(){
+  const consultores = getConsultores().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  if(consultores.length===0){ toast('Cadastre um consultor na aba Equipe primeiro'); return; }
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Consultor responsável</label>
+      <select id="jConsultor">${consultores.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>Nome do jovem</label><input autocomplete="off" id="jNome" placeholder="Nome completo"></div>
+    <div class="field"><label>Data de nascimento / idade</label><input autocomplete="off" id="jNasc" placeholder="Ex: 15 anos ou 12/03/2011"></div>
+    <div class="field"><label>Telefone do responsável</label><input autocomplete="off" id="jTel" placeholder="(81) 9xxxx-xxxx"></div>
+    <div class="field"><label>Alergias ou restrições</label><input autocomplete="off" id="jAlergia" placeholder="Ex: alergia a amendoim, ou 'nenhuma'"></div>
+  `;
+  const save = el('button','btn btn-gold btn-block','Cadastrar');
+  save.style.marginTop='6px';
+  body.appendChild(save);
+  openSheet('Novo jovem', body, true);
+  save.onclick = async ()=>{
+    const nome = $('#jNome').value.trim();
+    if(!nome){ toast('Digite o nome do jovem'); return; }
+    await addJovem({
+      consultorId: $('#jConsultor').value, nome,
+      nascimento: $('#jNasc').value.trim(), telefone: $('#jTel').value.trim(), alergias: $('#jAlergia').value.trim()
+    });
+    closeSheet(); toast('Jovem cadastrado');
+  };
+}
+
+function openEditJovem(id){
+  const j = state.jovens.find(x=>x.id===id);
+  if(!j) return;
+  const consultores = getConsultores().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Consultor responsável</label>
+      <select id="ejConsultor">${consultores.map(c=>`<option value="${c.id}" ${c.id===j.consultorId?'selected':''}>${esc(c.name)}</option>`).join('')}</select>
+    </div>
+    <div class="field"><label>Nome do jovem</label><input autocomplete="off" id="ejNome" value="${esc(j.nome)}"></div>
+    <div class="field"><label>Data de nascimento / idade</label><input autocomplete="off" id="ejNasc" value="${esc(j.nascimento||'')}"></div>
+    <div class="field"><label>Telefone do responsável</label><input autocomplete="off" id="ejTel" value="${esc(j.telefone||'')}"></div>
+    <div class="field"><label>Alergias ou restrições</label><input autocomplete="off" id="ejAlergia" value="${esc(j.alergias||'')}"></div>
+  `;
+  const save = el('button','btn btn-gold btn-block','Salvar');
+  save.style.marginTop='6px';
+  body.appendChild(save);
+  openSheet('Editar jovem', body, true);
+  save.onclick = async ()=>{
+    const nome = $('#ejNome').value.trim();
+    if(!nome){ toast('Digite o nome do jovem'); return; }
+    await updateJovem(j.id, {
+      consultorId: $('#ejConsultor').value, nome,
+      nascimento: $('#ejNasc').value.trim(), telefone: $('#ejTel').value.trim(), alergias: $('#ejAlergia').value.trim()
+    });
+    closeSheet(); toast('Atualizado');
+  };
+}
+
 /* ---------------- Equipe (roster + permissões) ---------------- */
 function renderEquipe(){
   const wrap = el('div');
@@ -1082,8 +1399,13 @@ function renderEquipe(){
   const card = el('div','card');
   sortRoster(state.roster.users).forEach(u=>{
     const row = el('div','roster-row');
+    let subRole = esc(u.manualRole);
+    if(u.manualRole==='Consultor'){
+      const ca = u.supervisorId ? state.roster.users.find(x=>x.id===u.supervisorId) : null;
+      subRole += ca ? ` • CA: ${esc(ca.name.split(' ')[0])}` : ' • sem CA definido';
+    }
     row.innerHTML = `
-      <div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (você)':''}</div><div class="roster-role">${esc(u.manualRole)}</div></div>
+      <div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (você)':''}</div><div class="roster-role">${subRole}</div></div>
       <span class="lvl-pill lvl-${u.access}">${ACCESS[u.access].label}</span>
     `;
     if(isAdmin() && u.id!==state.user.id){
@@ -1115,15 +1437,23 @@ function openAddMember(){
         <div class="seg-opt acc-admin" data-v="admin">Administrador</div>
       </div>
     </div>
+    <div class="field" id="mSupervisorField" style="display:none;"><label>CA responsável (opcional)</label>
+      <select id="mSupervisor"><option value="">— Nenhum ainda —</option>${getCAs().map(ca=>`<option value="${ca.id}">${esc(ca.name)}</option>`).join('')}</select>
+    </div>
     <div class="field" id="pinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="mPin" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div>
   `;
-  body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+  function refreshSupervisorVisibility(){
+    const role = body.querySelector('#mRole .seg-opt.active').dataset.v;
+    $('#mSupervisorField').style.display = role==='Consultor' ? 'block' : 'none';
+  }
+  body.querySelectorAll('#mRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#mRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); refreshSupervisorVisibility(); });
   body.querySelectorAll('#mAccess .seg-opt').forEach(o=> o.onclick=()=>{
     body.querySelectorAll('#mAccess .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active');
   });
   const save = el('button','btn btn-gold btn-block','Adicionar'); save.style.marginTop='6px';
   body.appendChild(save);
   openSheet('Adicionar membro', body, true);
+  refreshSupervisorVisibility();
 
   save.onclick = async ()=>{
     const name = $('#mName').value.trim();
@@ -1132,7 +1462,8 @@ function openAddMember(){
     const access = body.querySelector('#mAccess .seg-opt.active').dataset.v;
     const pin = $('#mPin').value.trim();
     if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
-    state.roster.users.push({id:uid(), name, manualRole:role, access, pin});
+    const supervisorId = role==='Consultor' ? ($('#mSupervisor').value || null) : null;
+    state.roster.users.push({id:uid(), name, manualRole:role, access, pin, supervisorId});
     await saveRoster(); closeSheet(); render(); toast('Membro adicionado');
   };
 }
@@ -1151,9 +1482,16 @@ function openEditMember(id){
         ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt acc-${a}${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
+    <div class="field" id="emSupervisorField" style="display:none;"><label>CA responsável (opcional)</label>
+      <select id="emSupervisor"><option value="">— Nenhum ainda —</option>${getCAs().map(ca=>`<option value="${ca.id}" ${u.supervisorId===ca.id?'selected':''}>${esc(ca.name)}</option>`).join('')}</select>
+    </div>
     <div class="field" id="empinField"><label>PIN de acesso (5 dígitos)</label><input autocomplete="one-time-code" id="emPin" type="password" inputmode="numeric" maxlength="5" value="${esc(u.pin||'')}"></div>
   `;
-  body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); });
+  function refreshEmSupervisorVisibility(){
+    const role = body.querySelector('#emRole .seg-opt.active').dataset.v;
+    $('#emSupervisorField').style.display = role==='Consultor' ? 'block' : 'none';
+  }
+  body.querySelectorAll('#emRole .seg-opt').forEach(o=> o.onclick=()=>{ body.querySelectorAll('#emRole .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active'); refreshEmSupervisorVisibility(); });
   body.querySelectorAll('#emAccess .seg-opt').forEach(o=> o.onclick=()=>{
     body.querySelectorAll('#emAccess .seg-opt').forEach(x=>x.classList.remove('active')); o.classList.add('active');
   });
@@ -1163,14 +1501,17 @@ function openEditMember(id){
   btnRow.appendChild(save); btnRow.appendChild(del);
   body.appendChild(btnRow);
   openSheet('Editar membro', body, true);
+  refreshEmSupervisorVisibility();
 
   save.onclick = async ()=>{
     const access = body.querySelector('#emAccess .seg-opt.active').dataset.v;
     const pin = $('#emPin').value.trim();
     if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
+    const role = body.querySelector('#emRole .seg-opt.active').dataset.v;
     u.name = $('#emName').value.trim() || u.name;
-    u.manualRole = body.querySelector('#emRole .seg-opt.active').dataset.v;
+    u.manualRole = role;
     u.access = access; u.pin = pin;
+    u.supervisorId = role==='Consultor' ? ($('#emSupervisor').value || null) : null;
     await saveRoster(); closeSheet(); render(); toast('Atualizado');
   };
   del.onclick = async ()=>{
