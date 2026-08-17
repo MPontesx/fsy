@@ -7,7 +7,7 @@
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1B3A5C">
+<meta name="theme-color" content="#014C9F">
 <meta name="color-scheme" content="only light">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,8 +19,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root{
-  --blue:#76B3E4;
-  --ink:#1B3A5C;
+  --blue:#8DAED4;
+  --ink:#014C9F;
   --black:#111111;
   --ink-soft:#4b5c6c;
   --muted:#6B7A88;
@@ -29,8 +29,8 @@
   --soft:#F5F6F7;
   --soft2:#EAEBED;
   --line:#DDDFE2;
-  --gold:#FFC73A;
-  --gold-deep:#C99A1E;
+  --gold:#FCC233;
+  --gold-deep:#B58C25;
   --red:#a3291f;
   --green:#3f6b46;
   --radius:14px;
@@ -71,12 +71,13 @@ body{
   z-index:30;
 }
 .brand{display:flex;align-items:center;gap:10px;min-width:0;}
-.badge-mark{
-  width:34px;height:34px;border-radius:8px;
-  background:linear-gradient(155deg,var(--gold),var(--gold-deep));
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Archivo Black',sans-serif;font-size:12px;color:#1B3A5C;
-  flex-shrink:0;
+.brand-mark{
+  height:26px;width:auto;display:block;flex-shrink:0;
+}
+.login-mark{
+  width:76px;height:76px;border-radius:18px;object-fit:cover;
+  margin:0 auto 18px auto;display:block;
+  box-shadow:0 8px 20px rgba(1,76,159,0.25);
 }
 .brand-text{display:flex;flex-direction:column;line-height:1.1;min-width:0;}
 .brand-text .t1{font-size:15px;font-weight:800;letter-spacing:0.01em;}
@@ -127,7 +128,7 @@ body{
   display:inline-flex;align-items:center;justify-content:center;gap:6px;
 }
 .btn-primary{background:var(--ink);color:#fff;}
-.btn-gold{background:var(--gold);color:#1B3A5C;}
+.btn-gold{background:var(--ink);color:#fff;}
 .btn-outline{background:transparent;border:1.5px solid var(--ink);color:var(--black);}
 .btn-ghost{background:var(--soft2);color:var(--ink-soft);}
 .btn-danger{background:#fbeae8;color:var(--red);}
@@ -230,7 +231,7 @@ body{
 .need-card.mine{
   border:1.5px solid var(--gold);
   background:#FFFCF2;
-  box-shadow:0 0 0 3px rgba(255,199,58,0.18);
+  box-shadow:0 0 0 3px rgba(252,194,51,0.18);
 }
 .mine-strip{
   display:flex;align-items:center;gap:6px;
@@ -243,11 +244,11 @@ body{
 .fab{
   position:absolute;right:16px;bottom:84px;z-index:25;
   width:52px;height:52px;border-radius:50%;
-  background:var(--gold);color:#1B3A5C;border:none;
+  background:var(--gold);color:#014C9F;border:none;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 6px 16px rgba(0,0,0,0.25);cursor:pointer;
 }
-.fab svg{width:24px;height:24px;stroke:#1B3A5C;stroke-width:2.3;fill:none;}
+.fab svg{width:24px;height:24px;stroke:#014C9F;stroke-width:2.3;fill:none;}
 
 /* ---------- Forms ---------- */
 .field{margin-bottom:12px;}
@@ -306,7 +307,7 @@ body{
 .lvl-consultor{background:#FFF3C4;color:#8a6a00;}
 
 /* Seg-opt coloridos para seleção de nível de acesso */
-.seg-opt.acc-consultor.active{background:#FFC73A;color:#4a3b00;}
+.seg-opt.acc-consultor.active{background:#FCC233;color:#4a3b00;}
 .seg-opt.acc-coordenacao.active{background:#8FC1E8;color:#12324a;}
 .seg-opt.acc-admin.active{background:var(--ink);color:#fff;}
 .seg-opt.acc-logistica.active{background:#8FDCA0;color:#1c4326;}
@@ -724,7 +725,7 @@ function render(){
 
   // top bar
   const top = el('div','topbar');
-  top.innerHTML = `<div class="brand"><div class="badge-mark">FSY</div><div class="brand-text"><div class="t1">FSY RECIFE NORTE</div><div class="t2">Conferência 2027</div></div></div>`;
+  top.innerHTML = `<div class="brand"><img class="brand-mark" src="icons/logo-mark-white.png" alt="FSY"><div class="brand-text"><div class="t1">FSY RECIFE NORTE</div><div class="t2">Conferência 2027</div></div></div>`;
   const chip = el('div','user-chip');
   chip.innerHTML = `<span class="dot"></span><span>${state.user ? esc(state.user.name.split(' ')[0]) : 'Entrar'}</span>`;
   chip.onclick = state.user ? showAccountMenu : showIdentityPicker;
@@ -788,7 +789,7 @@ function renderWelcome(){
   const w = el('div');
   w.innerHTML = `
     <div style="text-align:center;padding:40px 10px 10px 10px;">
-      <div class="badge-mark" style="width:56px;height:56px;font-size:16px;margin:0 auto 18px auto;">FSY</div>
+      <img class="login-mark" src="icons/logo-full.png" alt="FSY Recife Norte">
       <div class="display" style="font-size:22px;margin-bottom:8px;">Bem-vindo(a)</div>
       <div style="font-size:13px;color:var(--muted);line-height:1.6;max-width:300px;margin:0 auto 26px auto;">
         Ferramenta da equipe de consultores e coordenadores para acompanhar o cronograma da sessão e centralizar pedidos e necessidades durante o acampamento.
