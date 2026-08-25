@@ -103,11 +103,16 @@ body{
 
 /* ---------- Bottom nav ---------- */
 .navbar{
-  position:sticky;bottom:0;
+  position:fixed;
+  left:50%;
+  bottom:0;
+  transform:translateX(-50%);
+  width:100%;
+  max-width:480px;
   display:flex;
   background:var(--ink);
   border-top:1px solid #000;
-  z-index:30;
+  z-index:9999;
   padding-bottom:env(safe-area-inset-bottom);
 }
 .navbtn{
@@ -806,8 +811,16 @@ function openSheet(title, bodyNode, centered){
 function closeSheet(){ const o = document.getElementById('activeOverlay'); if(o) o.remove(); }
 
 /* ---------------- Render: shell ---------------- */
+let __lastRenderTab = null;
 function render(){
   const app = $('#app');
+
+  // Preserva a posição de rolagem do conteúdo quando o re-render é da MESMA aba
+  // (ex.: marcar uma leitura, sync em tempo real), evitando o salto pro topo.
+  const prevContent = document.getElementById('content');
+  const keepScroll = prevContent && __lastRenderTab === state.tab;
+  const savedScrollTop = keepScroll ? prevContent.scrollTop : 0;
+
   app.innerHTML = '';
 
   // top bar
@@ -845,9 +858,20 @@ function render(){
     }
   }
 
-  // bottom nav
+  if(savedScrollTop) content.scrollTop = savedScrollTop;
+  __lastRenderTab = state.user ? state.tab : null;
+
+  // bottom nav — vive fora do #app (direto no body) e não é recriada a cada
+  // render, apenas atualizada. Assim ela fica sempre fixa na tela e nunca
+  // "some" durante re-renders (sync em tempo real, trocas de estado, etc).
+  let nav = document.getElementById('bottomNav');
   if(state.user){
-    const nav = el('div','navbar');
+    if(!nav){
+      nav = el('div','navbar');
+      nav.id = 'bottomNav';
+      document.body.appendChild(nav);
+    }
+    nav.innerHTML = '';
     const tabs = [
       {id:'cronograma', label:'Cronograma', icon:ICONS.calendar},
       {id:'leituras', label:'Leituras', icon:ICONS.book},
@@ -870,7 +894,8 @@ function render(){
       b.onclick = ()=>{ state.tab = t.id; render(); };
       nav.appendChild(b);
     });
-    app.appendChild(nav);
+  } else if(nav){
+    nav.remove();
   }
 }
 
