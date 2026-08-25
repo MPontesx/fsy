@@ -213,20 +213,27 @@ body{
 }
 .fchip.active{background:var(--blue);color:var(--black);}
 
-.need-card{padding:14px;cursor:pointer;}
-.need-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
-.need-title{font-weight:700;font-size:14px;min-width:0;}
+.need-card{padding:18px;cursor:pointer;margin-bottom:14px;}
+.need-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.need-title{font-weight:700;font-size:15.5px;min-width:0;line-height:1.35;}
 .tag{
-  font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;
-  padding:3px 7px;border-radius:6px;white-space:nowrap;flex-shrink:0;
+  font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.04em;
+  padding:4px 9px;border-radius:6px;white-space:nowrap;flex-shrink:0;
 }
 .tag-aberto{background:#fbeae8;color:var(--red);}
 .tag-andamento{background:#FFF3D6;color:var(--gold-deep);}
 .tag-concluido{background:#e7f1e8;color:var(--green);}
 .prio-urgente{color:var(--red);}
 .prio-alta{color:var(--gold-deep);}
-.need-desc{font-size:12.5px;color:var(--ink-soft);margin-top:6px;line-height:1.45;}
-.need-meta{font-size:10.5px;color:var(--muted);margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;}
+.need-desc{font-size:13.5px;color:var(--ink-soft);margin-top:10px;line-height:1.6;}
+.need-comment{font-size:12.5px;color:var(--ink-soft);margin-top:10px;line-height:1.55;background:var(--soft);padding:10px 12px;border-radius:9px;}
+.need-meta{font-size:11px;color:var(--muted);margin-top:12px;display:flex;gap:12px;row-gap:6px;flex-wrap:wrap;}
+.done-strip{
+  display:flex;align-items:center;gap:6px;
+  font-size:10.5px;font-weight:800;color:#1c6b30;
+  background:#DDF3E1;padding:6px 10px;margin:-18px -18px 12px -18px;
+  border-radius:var(--radius) var(--radius) 0 0;
+}
 /* Card de chamado que EU assumi: fica destacado pra não esquecer */
 .need-card.mine{
   border:1.5px solid var(--gold);
@@ -236,7 +243,7 @@ body{
 .mine-strip{
   display:flex;align-items:center;gap:6px;
   font-size:10.5px;font-weight:800;color:#8a6a00;
-  background:#FFF3C4;padding:5px 10px;margin:-14px -14px 10px -14px;
+  background:#FFF3C4;padding:6px 10px;margin:-18px -18px 12px -18px;
   border-radius:var(--radius) var(--radius) 0 0;
   text-transform:uppercase;letter-spacing:0.03em;
 }
@@ -294,6 +301,21 @@ body{
 .empty .ic{font-size:34px;margin-bottom:8px;}
 .empty .t{font-weight:700;color:var(--ink-soft);font-size:14px;margin-bottom:4px;}
 .empty .s{font-size:12px;}
+
+/* ---------- Leituras ---------- */
+.read-progress-bar{background:var(--soft2);border-radius:8px;height:10px;overflow:hidden;margin-bottom:6px;}
+.read-progress-fill{background:var(--green);height:100%;}
+.read-month{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-weight:800;padding:10px 14px 6px 14px;background:var(--soft);}
+.read-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line);}
+.read-row:last-child{border-bottom:none;}
+.read-row.today{background:#FFF8E1;}
+.read-row.overdue .read-chap{color:var(--red);}
+.read-date{width:42px;flex-shrink:0;font-size:12px;font-weight:800;color:var(--ink-soft);text-align:center;}
+.read-wd{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;font-weight:700;}
+.read-main{flex:1;min-width:0;}
+.read-chap{font-size:13.5px;font-weight:700;}
+.read-chap.done{text-decoration:line-through;color:var(--muted);}
+.read-count{font-size:10.5px;color:var(--muted);margin-top:2px;}
 
 .roster-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-bottom:1px solid var(--line);gap:8px;}
 .roster-row:last-child{border-bottom:none;}
@@ -356,6 +378,7 @@ const db = getFirestore(firebaseApp);
 const rosterRef   = doc(db, 'fsyEquipe', 'roster');
 const needsRef    = doc(db, 'fsyEquipe', 'needs');
 const scheduleRef = doc(db, 'fsyEquipe', 'schedule');
+const readingsRef = doc(db, 'fsyEquipe', 'readings');
 // Jovens fica numa coleção de verdade (um documento por jovem), diferente das outras
 // "gavetas" acima — assim o check-in do dia 1 não precisa reescrever a lista inteira
 // toda vez que alguém marca presença, e cada edição é isolada por jovem.
@@ -392,6 +415,7 @@ let state = {
   roster:{users:[]},
   needs:[],
   schedule:null,
+  readings:{progress:{}}, // progress[dayIndex] = [userId, userId...] -- quem já leu aquele dia
   jovens:[],            // [{id, consultorId, nome, nascimento, telefone, alergias, checkedIn, checkedInAt, flagged, flagNote}]
   tab:'cronograma',
   day:0,
@@ -524,6 +548,58 @@ function defaultSchedule(){
   ]};
 }
 
+/* ---------------- Plano de leitura: Livro de Mórmon até o FSY (6 de fev) ----------------
+   Gerado automaticamente: distribui os 239 capítulos do Livro de Mórmon (1 Néfi ao Morôni)
+   igualmente entre os dias de hoje até 6/fev, para que ninguém precise digitar isso à mão. */
+function buildReadingPlan(){
+  const books = [
+    ['1 Néfi',22],['2 Néfi',33],['Jacó',7],['Enos',1],['Jarom',1],['Ômni',1],
+    ['Palavras de Mórmon',1],['Mosias',29],['Alma',63],['Helamã',16],
+    ['3 Néfi',30],['4 Néfi',1],['Mórmon',9],['Éter',15],['Morôni',10]
+  ];
+  const chapters = [];
+  books.forEach(([name,n])=>{ for(let c=1;c<=n;c++) chapters.push(`${name} ${c}`); });
+
+  const start = new Date(2026,7,30); // 30 de agosto de 2026
+  const end   = new Date(2027,1,6);  // 6 de fevereiro de 2027 (dia do FSY)
+  const dayMs = 86400000;
+  const totalDays = Math.round((end-start)/dayMs) + 1;
+  const totalChapters = chapters.length;
+
+  const today = new Date(); today.setHours(0,0,0,0);
+  const monthNames = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const weekdayNames = ['dom','seg','ter','qua','qui','sex','sáb'];
+
+  const plan = [];
+  let chIdx = 0;
+  for(let i=0;i<totalDays;i++){
+    const date = new Date(start.getTime() + i*dayMs);
+    const targetCum = Math.round((i+1)*totalChapters/totalDays);
+    const num = Math.max(0, targetCum - chIdx);
+    const dayChapters = chapters.slice(chIdx, chIdx+num);
+    chIdx += num;
+    const d0 = new Date(date); d0.setHours(0,0,0,0);
+    plan.push({
+      dateLabel: String(date.getDate()).padStart(2,'0')+'/'+String(date.getMonth()+1).padStart(2,'0'),
+      weekdayLabel: weekdayNames[date.getDay()],
+      monthLabel: monthNames[date.getMonth()] + ' de ' + date.getFullYear(),
+      chapters: dayChapters,
+      isToday: d0.getTime()===today.getTime(),
+      isPast: d0.getTime() < today.getTime()
+    });
+  }
+  // Se sobrar capítulo por causa de arredondamento, cai no último dia (véspera do FSY).
+  if(chIdx < totalChapters) plan[plan.length-1].chapters = plan[plan.length-1].chapters.concat(chapters.slice(chIdx));
+  return plan;
+}
+const READING_PLAN = buildReadingPlan();
+function readingProgressCount(userId){
+  const progress = state.readings.progress || {};
+  let count = 0;
+  Object.keys(progress).forEach(k=>{ if((progress[k]||[]).includes(userId)) count++; });
+  return count;
+}
+
 /* ---------------- Storage ---------------- */
 async function loadAll(){
   try{
@@ -546,6 +622,12 @@ async function loadAll(){
     }
   }catch(e){ state.schedule = defaultSchedule(); }
   try{
+    const snap = await getDoc(readingsRef);
+    state.readings = snap.exists() ? snap.data() : {progress:{}};
+    if(!state.readings.progress) state.readings.progress = {};
+  }catch(e){ state.readings = {progress:{}}; }
+
+  try{
     const snap = await getDocs(jovensCol);
     state.jovens = snap.docs.map(d=>({id:d.id, ...d.data()}));
   }catch(e){ state.jovens = []; }
@@ -555,6 +637,7 @@ async function loadAll(){
 async function saveRoster(){ try{ await setDoc(rosterRef, state.roster); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveNeeds(){ try{ await setDoc(needsRef, {items: state.needs}); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveSchedule(){ try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+async function saveReadings(){ try{ await setDoc(readingsRef, state.readings); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 
 /* Jovens: cada um é um documento próprio (não um array gigante), então check-in
    e flag de um jovem nunca colidem com a edição de outro jovem ao mesmo tempo. */
@@ -586,6 +669,9 @@ function startRealtimeSync(){
   onSnapshot(jovensCol, snap=>{
     state.jovens = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
   }, err=>console.warn('sync jovens:', err));
+  onSnapshot(readingsRef, snap=>{
+    if(snap.exists()){ state.readings = snap.data(); if(!state.readings.progress) state.readings.progress={}; render(); }
+  }, err=>console.warn('sync readings:', err));
 }
 
 /* ---------------- Icons ---------------- */
@@ -599,7 +685,8 @@ const ICONS = {
   smile:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
   shield:'<svg viewBox="0 0 24 24"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4z"/></svg>',
   search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
-  flag:'<svg viewBox="0 0 24 24"><path d="M4 21V4"/><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1"/></svg>'
+  flag:'<svg viewBox="0 0 24 24"><path d="M4 21V4"/><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1"/></svg>',
+  book:'<svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v15H6.5A2.5 2.5 0 0 0 4 19.5v-15z"/><path d="M20 17v3a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 19.5"/></svg>'
 };
 
 /* ---------------- Identity ---------------- */
@@ -739,6 +826,7 @@ function render(){
     content.appendChild(renderWelcome());
   } else {
     if(state.tab==='cronograma') content.appendChild(renderCronograma());
+    if(state.tab==='leituras') content.appendChild(renderLeituras());
     if(state.tab==='necessidades') content.appendChild(renderNecessidades());
     if(state.tab==='equipe') content.appendChild(renderEquipe());
     if(state.tab==='meusjovens') content.appendChild(renderMeusJovens());
@@ -762,6 +850,7 @@ function render(){
     const nav = el('div','navbar');
     const tabs = [
       {id:'cronograma', label:'Cronograma', icon:ICONS.calendar},
+      {id:'leituras', label:'Leituras', icon:ICONS.book},
       {id:'necessidades', label:'Necessidades', icon:ICONS.list},
       {id:'equipe', label:'Equipe', icon:ICONS.users}
     ];
@@ -931,6 +1020,87 @@ function openEditActivity(dayIdx, actIdx){
   };
 }
 
+/* ---------------- Leituras (Livro de Mórmon até o FSY) ---------------- */
+function renderLeituras(){
+  const wrap = el('div');
+  wrap.appendChild(el('div','section-title','Leitura do Livro de Mórmon'));
+
+  const total = READING_PLAN.length;
+  const myCount = readingProgressCount(state.user.id);
+  const pct = total ? Math.round(myCount/total*100) : 0;
+  const intro = el('div','card card-pad');
+  intro.innerHTML = `
+    <div style="font-weight:800;font-size:15px;margin-bottom:4px;">Sua leitura</div>
+    <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:10px;">Plano diário do 1 Néfi ao Morôni, até o FSY (6 de fevereiro).</div>
+    <div class="read-progress-bar"><div class="read-progress-fill" style="width:${pct}%;"></div></div>
+    <div style="font-size:11.5px;color:var(--muted);">${myCount} de ${total} dias concluídos (${pct}%)</div>
+  `;
+  wrap.appendChild(intro);
+
+  const btnRow = el('div'); btnRow.style.display='flex'; btnRow.style.gap='8px'; btnRow.style.marginBottom='12px';
+  const jumpBtn = el('button','btn btn-ghost','Ir para hoje'); jumpBtn.style.flex='1';
+  jumpBtn.onclick = ()=>{ const t = document.getElementById('read-today'); if(t) t.scrollIntoView({behavior:'smooth', block:'center'}); };
+  btnRow.appendChild(jumpBtn);
+  if(canManage()){
+    const teamBtn = el('button','btn btn-outline','Progresso da equipe'); teamBtn.style.flex='1';
+    teamBtn.onclick = openTeamReadingProgress;
+    btnRow.appendChild(teamBtn);
+  }
+  wrap.appendChild(btnRow);
+
+  const card = el('div','card');
+  let lastMonth = null;
+  READING_PLAN.forEach((d,idx)=>{
+    if(d.monthLabel !== lastMonth){
+      card.appendChild(el('div','read-month', d.monthLabel));
+      lastMonth = d.monthLabel;
+    }
+    if(!d.chapters.length) return; // dia sem leitura designada (não deve ocorrer, mas por segurança)
+    const doneUsers = (state.readings.progress && state.readings.progress[idx]) || [];
+    const doneByMe = doneUsers.includes(state.user.id);
+    const row = el('div','read-row'+(d.isToday?' today':'')+(d.isPast && !doneByMe?' overdue':''));
+    if(d.isToday) row.id = 'read-today';
+    row.innerHTML = `
+      <div class="read-date">${d.dateLabel}<span class="read-wd">${d.weekdayLabel}</span></div>
+      <div class="read-main">
+        <div class="read-chap${doneByMe?' done':''}">${esc(d.chapters.join(' • '))}</div>
+        ${doneUsers.length ? `<div class="read-count">${doneUsers.length} concluíram</div>` : ''}
+      </div>
+      <div class="check${doneByMe?' checked':''}">${ICONS.check}</div>
+    `;
+    row.querySelector('.check').onclick = ()=> toggleReadingDone(idx);
+    card.appendChild(row);
+  });
+  wrap.appendChild(card);
+  return wrap;
+}
+
+async function toggleReadingDone(idx){
+  if(!state.readings.progress) state.readings.progress = {};
+  const arr = state.readings.progress[idx] || [];
+  const i = arr.indexOf(state.user.id);
+  if(i===-1) arr.push(state.user.id); else arr.splice(i,1);
+  state.readings.progress[idx] = arr;
+  await saveReadings();
+  render();
+}
+
+function openTeamReadingProgress(){
+  const total = READING_PLAN.length;
+  const list = sortRoster(state.roster.users).map(u=>({u, count: readingProgressCount(u.id)}));
+  const body = el('div');
+  body.appendChild(el('div','helptext', `Quantos dos ${total} dias de leitura cada pessoa já marcou como concluído.`));
+  const listCard = el('div','card');
+  list.forEach(({u,count})=>{
+    const row = el('div','roster-row');
+    const pct = total ? Math.round(count/total*100) : 0;
+    row.innerHTML = `<div><div class="roster-name">${esc(u.name)}${u.id===state.user.id?' (você)':''}</div><div class="roster-role">${count} de ${total} dias</div></div><span class="lvl-pill lvl-${u.access}">${pct}%</span>`;
+    listCard.appendChild(row);
+  });
+  body.appendChild(listCard);
+  openSheet('Progresso da equipe', body, true);
+}
+
 /* ---------------- Necessidades (helpdesk) ---------------- */
 const STATUS_LABEL = {aberto:'Aberto', andamento:'Em andamento', concluido:'Concluído'};
 const PRIO_LABEL = {baixa:'Baixa',media:'Média',alta:'Alta',urgente:'Urgente'};
@@ -971,14 +1141,18 @@ function renderNecessidades(){
 
   list.forEach(n=>{
     const isMine = n.claimedBy && state.user && n.claimedBy===state.user.id;
+    const isMyReport = n.createdBy===state.user.id;
+    const justFinished = n.status==='concluido' && isMyReport;
     const card = el('div','card need-card'+(isMine?' mine':''));
     card.innerHTML = `
       ${isMine ? `<div class="mine-strip">⭐ Você assumiu — pendente de conclusão</div>` : ''}
+      ${justFinished ? `<div class="done-strip">✅ Finalizado — seu chamado foi atendido</div>` : ''}
       <div class="need-top">
         <div class="need-title">${esc(n.title)}</div>
         <span class="tag tag-${n.status}">${STATUS_LABEL[n.status]}</span>
       </div>
       <div class="need-desc">${esc(n.desc)}</div>
+      ${n.claimComment ? `<div class="need-comment">💬 ${esc(n.claimComment)}</div>` : ''}
       <div class="need-meta">
         <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
         <span>${esc(n.category)}</span>
@@ -1042,7 +1216,7 @@ function openNewNeed(){
       id:uid(), title, desc:$('#nDesc').value.trim(), category:cat, priority:prio,
       status:'aberto', createdBy:state.user.id, createdByName:state.user.name,
       assignedTo, createdAt:Date.now(), updatedAt:Date.now(),
-      claimedBy:null, claimedByName:null
+      claimedBy:null, claimedByName:null, claimComment:null
     });
     await saveNeeds(); closeSheet(); render(); toast('Registrado com sucesso');
   };
@@ -1053,6 +1227,7 @@ function openNeedDetail(id){
   if(!n) return;
   const body = el('div');
   body.innerHTML = `
+    ${n.status==='concluido' ? `<div class="done-strip" style="margin:-0px -0px 14px -0px;border-radius:var(--radius);">✅ Este chamado foi finalizado (atendido)</div>` : ''}
     <div class="need-desc" style="margin-bottom:14px;">${esc(n.desc)||'<i>Sem descrição</i>'}</div>
     <div class="need-meta" style="margin-bottom:18px;">
       <span class="${n.priority==='urgente'?'prio-urgente':n.priority==='alta'?'prio-alta':''}">● ${PRIO_LABEL[n.priority]}</span>
@@ -1066,34 +1241,62 @@ function openNeedDetail(id){
   // qualquer chamado, não só os encaminhados pra Logística.
   if(myAccessRank() >= 2){
     const claimWrap = el('div'); claimWrap.style.marginBottom = '16px';
+    // Mostra um campo de comentário (opcional) para quem está assumindo/reassumindo
+    // ou para o responsável atual editar o comentário já deixado.
+    const showClaimForm = (prefill)=>{
+      claimWrap.innerHTML = '';
+      const field = el('div','field');
+      field.innerHTML = `<label>Comentário (opcional)</label><textarea autocomplete="off" id="claimComment" placeholder="Ex: Já estou providenciando, devo resolver até amanhã">${esc(prefill||'')}</textarea>`;
+      claimWrap.appendChild(field);
+      const confirm = el('button','btn btn-gold btn-block','Confirmar');
+      confirm.style.marginTop='8px';
+      confirm.onclick = async ()=>{
+        n.claimedBy=state.user.id; n.claimedByName=state.user.name; n.updatedAt=Date.now();
+        n.claimComment = $('#claimComment').value.trim() || null;
+        await saveNeeds(); closeSheet(); render(); toast('Você assumiu este chamado');
+      };
+      claimWrap.appendChild(confirm);
+    };
     if(n.claimedBy){
       const info = el('div','helptext', n.claimedBy===state.user.id
         ? `⭐ <b>Você é o responsável</b> por este chamado.`
         : `Responsável: <b>${esc(n.claimedByName)}</b>`);
       claimWrap.appendChild(info);
+      if(n.claimComment){
+        const commentDiv = el('div','need-desc', `💬 ${esc(n.claimComment)}`);
+        commentDiv.style.marginTop='6px';
+        claimWrap.appendChild(commentDiv);
+      }
       if(n.claimedBy===state.user.id){
+        if(n.status!=='concluido' && canManageNeed(n)){
+          const finish = el('button','btn btn-gold btn-block','✅ Finalizar chamado (atendido)');
+          finish.style.marginTop='8px';
+          finish.onclick = async ()=>{
+            n.status='concluido'; n.updatedAt=Date.now();
+            await saveNeeds(); closeSheet(); render(); toast('Chamado finalizado');
+          };
+          claimWrap.appendChild(finish);
+        }
+        const editComment = el('button','btn btn-outline btn-block','Editar comentário');
+        editComment.style.marginTop='8px';
+        editComment.onclick = ()=> showClaimForm(n.claimComment);
+        claimWrap.appendChild(editComment);
         const release = el('button','btn btn-outline btn-block','Deixar de ser responsável');
         release.style.marginTop='8px';
         release.onclick = async ()=>{
-          n.claimedBy=null; n.claimedByName=null; n.updatedAt=Date.now();
+          n.claimedBy=null; n.claimedByName=null; n.claimComment=null; n.updatedAt=Date.now();
           await saveNeeds(); closeSheet(); render(); toast('Você não é mais o responsável');
         };
         claimWrap.appendChild(release);
       } else {
         const takeover = el('button','btn btn-outline btn-block','Assumir mesmo assim');
         takeover.style.marginTop='8px';
-        takeover.onclick = async ()=>{
-          n.claimedBy=state.user.id; n.claimedByName=state.user.name; n.updatedAt=Date.now();
-          await saveNeeds(); closeSheet(); render(); toast('Você assumiu este chamado');
-        };
+        takeover.onclick = ()=> showClaimForm('');
         claimWrap.appendChild(takeover);
       }
     } else {
       const claim = el('button','btn btn-gold btn-block','Assumir chamado');
-      claim.onclick = async ()=>{
-        n.claimedBy=state.user.id; n.claimedByName=state.user.name; n.updatedAt=Date.now();
-        await saveNeeds(); closeSheet(); render(); toast('Você assumiu este chamado');
-      };
+      claim.onclick = ()=> showClaimForm('');
       claimWrap.appendChild(claim);
     }
     body.appendChild(claimWrap);
