@@ -1623,6 +1623,11 @@ function renderEquipe(){
     addBtn.style.marginBottom='12px';
     addBtn.onclick = openAddMember;
     wrap.appendChild(addBtn);
+
+    const myPinBtn = el('button','btn btn-outline btn-block','Trocar meu PIN');
+    myPinBtn.style.marginBottom='12px';
+    myPinBtn.onclick = openChangeOwnPin;
+    wrap.appendChild(myPinBtn);
   }
 
   const card = el('div','card');
@@ -1694,6 +1699,30 @@ function openAddMember(){
     const supervisorId = role==='Consultor' ? ($('#mSupervisor').value || null) : null;
     state.roster.users.push({id:uid(), name, manualRole:role, access, pin, supervisorId});
     await saveRoster(); closeSheet(); render(); toast('Membro adicionado');
+  };
+}
+
+function openChangeOwnPin(){
+  if(!isAdmin()) return;
+  const u = state.roster.users.find(x=>x.id===state.user.id);
+  if(!u) return;
+  const body = el('div');
+  body.innerHTML = `
+    <div class="field"><label>Novo PIN (5 dígitos)</label><input autocomplete="one-time-code" id="ownPin" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+    <div class="field"><label>Confirme o novo PIN</label><input autocomplete="one-time-code" id="ownPinConfirm" type="password" inputmode="numeric" maxlength="5" placeholder="00000"></div>
+  `;
+  const save = el('button','btn btn-gold btn-block','Salvar novo PIN');
+  save.style.marginTop='6px';
+  body.appendChild(save);
+  openSheet('Trocar meu PIN', body, true);
+  save.onclick = async ()=>{
+    const pin = $('#ownPin').value.trim();
+    const confirmPin = $('#ownPinConfirm').value.trim();
+    if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
+    if(pin !== confirmPin){ toast('Os PINs não coincidem'); return; }
+    u.pin = pin;
+    state.user.pin = pin;
+    await saveRoster(); await rememberIdentity(u); closeSheet(); toast('PIN atualizado');
   };
 }
 
