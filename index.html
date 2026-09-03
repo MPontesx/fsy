@@ -383,13 +383,13 @@ const db = getFirestore(firebaseApp);
 
 // Um documento por "gaveta" de dados, todos dentro da coleção 'fsyEquipe'.
 const rosterRef   = doc(db, 'fsyEquipe', 'roster');
-const needsRef    = doc(db, 'fsyEquipe', 'needs');
 const scheduleRef = doc(db, 'fsyEquipe', 'schedule');
 const readingsRef = doc(db, 'fsyEquipe', 'readings');
-// Jovens fica numa coleção de verdade (um documento por jovem), diferente das outras
-// "gavetas" acima — assim o check-in do dia 1 não precisa reescrever a lista inteira
-// toda vez que alguém marca presença, e cada edição é isolada por jovem.
+// Jovens e necessidades (chamados) ficam em coleções de verdade (um documento por item),
+// diferente das "gavetas" acima — assim uma edição de uma pessoa não sobrescreve a de outra
+// que salvou ao mesmo tempo (era exatamente esse o problema com o antigo needsRef/array único).
 const jovensCol = collection(db, 'jovens');
+const needsCol  = collection(db, 'necessidades');
 
 const ACCESS = {
   admin:        {label:'Administrador', rank:3},
@@ -617,8 +617,8 @@ async function loadAll(){
   }catch(e){ state.roster = {users:[]}; }
 
   try{
-    const snap = await getDoc(needsRef);
-    state.needs = snap.exists() ? (snap.data().items || []) : [];
+    const snap = await getDocs(needsCol);
+    state.needs = snap.docs.map(d=>({id:d.id, ...d.data()}));
   }catch(e){ state.needs = []; }
 
   try{
@@ -644,9 +644,23 @@ async function loadAll(){
   state.loaded = true;
 }
 async function saveRoster(){ try{ await setDoc(rosterRef, state.roster); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
-async function saveNeeds(){ try{ await setDoc(needsRef, {items: state.needs}); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveSchedule(){ try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
 async function saveReadings(){ try{ await setDoc(readingsRef, state.readings); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+
+/* Chamados: cada um é um documento próprio (igual jovens), então duas pessoas
+   mexendo em chamados diferentes ao mesmo tempo nunca sobrescrevem uma à outra. */
+async function addNeed(data){
+  try{ await addDoc(needsCol, data); }
+  catch(e){ toast('Erro ao salvar. Tente novamente.'); }
+}
+async function updateNeed(id, fields){
+  try{ await updateDoc(doc(db,'necessidades',id), fields); }
+  catch(e){ toast('Erro ao salvar. Tente novamente.'); }
+}
+async function deleteNeed(id){
+  try{ await deleteDoc(doc(db,'necessidades',id)); }
+  catch(e){ toast('Erro ao excluir. Tente novamente.'); }
+}
 
 /* Jovens: cada um é um documento próprio (não um array gigante), então check-in
    e flag de um jovem nunca colidem com a edição de outro jovem ao mesmo tempo. */
@@ -669,8 +683,8 @@ function startRealtimeSync(){
   onSnapshot(rosterRef, snap=>{
     if(snap.exists()){ state.roster = snap.data(); render(); }
   }, err=>console.warn('sync roster:', err));
-  onSnapshot(needsRef, snap=>{
-    if(snap.exists()){ state.needs = snap.data().items || []; render(); }
+  onSnapshot(needsCol, snap=>{
+    state.needs = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
   }, err=>console.warn('sync needs:', err));
   onSnapshot(scheduleRef, snap=>{
     if(snap.exists()){ state.schedule = snap.data(); render(); }
@@ -1241,13 +1255,13 @@ function openNewNeed(){
     const cat = body.querySelector('#nCat .seg-opt.active').dataset.v;
     const assignedTo = body.querySelector('#nAssign .seg-opt.active').dataset.v;
     const prio = body.querySelector('#nPrio .seg-opt.active').dataset.v;
-    state.needs.push({
-      id:uid(), title, desc:$('#nDesc').value.trim(), category:cat, priority:prio,
+    await addNeed({
+      title, desc:$('#nDesc').value.trim(), category:cat, priority:prio,
       status:'aberto', createdBy:state.user.id, createdByName:state.user.name,
       assignedTo, createdAt:Date.now(), updatedAt:Date.now(),
       claimedBy:null, claimedByName:null, claimComment:null
     });
-    await saveNeeds(); closeSheet(); render(); toast('Registrado com sucesso');
+    closeSheet(); toast('Registrado com sucesso');
   };
 }
 
@@ -1280,9 +1294,9 @@ function openNeedDetail(id){
       const confirm = el('button','btn btn-gold btn-block','Confirmar');
       confirm.style.marginTop='8px';
       confirm.onclick = async ()=>{
-        n.claimedBy=state.user.id; n.claimedByName=state.user.name; n.updatedAt=Date.now();
-        n.claimComment = $('#claimComment').value.trim() || null;
-        await saveNeeds(); closeSheet(); render(); toast('Você assumiu este chamado');
+        const claimComment = $('#claimComment').value.trim() || null;
+        await updateNeed(n.id, {claimedBy:state.user.id, claimedByName:state.user.name, updatedAt:Date.now(), claimComment});
+        closeSheet(); toast('Você assumiu este chamado');
       };
       claimWrap.appendChild(confirm);
     };
@@ -1301,8 +1315,8 @@ function openNeedDetail(id){
           const finish = el('button','btn btn-gold btn-block','✅ Finalizar chamado (atendido)');
           finish.style.marginTop='8px';
           finish.onclick = async ()=>{
-            n.status='concluido'; n.updatedAt=Date.now();
-            await saveNeeds(); closeSheet(); render(); toast('Chamado finalizado');
+            await updateNeed(n.id, {status:'concluido', updatedAt:Date.now()});
+            closeSheet(); toast('Chamado finalizado');
           };
           claimWrap.appendChild(finish);
         }
@@ -1313,8 +1327,8 @@ function openNeedDetail(id){
         const release = el('button','btn btn-outline btn-block','Deixar de ser responsável');
         release.style.marginTop='8px';
         release.onclick = async ()=>{
-          n.claimedBy=null; n.claimedByName=null; n.claimComment=null; n.updatedAt=Date.now();
-          await saveNeeds(); closeSheet(); render(); toast('Você não é mais o responsável');
+          await updateNeed(n.id, {claimedBy:null, claimedByName:null, claimComment:null, updatedAt:Date.now()});
+          closeSheet(); toast('Você não é mais o responsável');
         };
         claimWrap.appendChild(release);
       } else {
@@ -1338,11 +1352,10 @@ function openNeedDetail(id){
       const o = el('div','seg-opt'+(n.status===s?' active':''), STATUS_LABEL[s]);
       o.dataset.v = s;
       o.onclick = async ()=>{
-        n.status = s; n.updatedAt = Date.now();
-        await saveNeeds();
+        await updateNeed(n.id, {status:s, updatedAt:Date.now()});
         seg.querySelectorAll('.seg-opt').forEach(x=>x.classList.remove('active'));
         o.classList.add('active');
-        render(); toast('Status atualizado');
+        toast('Status atualizado');
       };
       seg.appendChild(o);
     });
@@ -1351,8 +1364,7 @@ function openNeedDetail(id){
     const del = el('button','btn btn-danger btn-block','Excluir necessidade');
     del.style.marginTop='16px';
     del.onclick = async ()=>{
-      state.needs = state.needs.filter(x=>x.id!==id);
-      await saveNeeds(); closeSheet(); render(); toast('Excluído');
+      await deleteNeed(id); closeSheet(); toast('Excluído');
     };
     body.appendChild(del);
   } else if(n.createdBy===state.user.id){
