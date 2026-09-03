@@ -327,10 +327,11 @@ body{
 .roster-name{font-weight:700;font-size:13.5px;}
 .roster-role{font-size:11px;color:var(--muted);margin-top:1px;}
 .lvl-pill{font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;text-transform:uppercase;white-space:nowrap;flex-shrink:0;}
-/* Cores de acesso: Consultor=amarelo, Coordenação=azul claro, Administrador=azul marinho, Logística=verde claro */
+/* Cores de acesso: Consultor=amarelo, Coordenação=azul claro, Administrador=azul marinho, Logística=verde claro, Equipe Médica=vermelho */
 .lvl-admin{background:var(--ink);color:#fff;}
 .lvl-coordenacao{background:#DCEBF8;color:#265a82;}
 .lvl-logistica{background:#DFF3E1;color:var(--green);}
+.lvl-medica{background:#FBDADA;color:#a13a3a;}
 .lvl-consultor{background:#FFF3C4;color:#8a6a00;}
 
 /* Seg-opt coloridos para seleção de nível de acesso */
@@ -393,6 +394,7 @@ const ACCESS = {
   admin:        {label:'Administrador', rank:3},
   coordenacao:  {label:'Coordenação',    rank:2},
   logistica:    {label:'Logística',      rank:2},
+  medica:       {label:'Equipe Médica',  rank:2},
   consultor:    {label:'Consultor',      rank:1}
 };
 // Adicionado 'Logística' como uma função de equipe (roster), igual às demais.
@@ -402,7 +404,7 @@ const MANUAL_ROLES = ['Consultor','Coordenador','CA`S','Casal Diretor','Logísti
 // e dentro de cada grupo, ordem alfabética por nome.
 function rosterGroupRank(u){
   if(u.access==='admin') return 0;
-  if(u.access==='logistica') return 1;
+  if(u.access==='logistica' || u.access==='medica') return 1;
   if(u.access==='coordenacao') return u.manualRole==='CA`S' ? 3 : 2;
   return 4; // consultor
 }
@@ -1737,7 +1739,7 @@ function openEditMember(id){
     </div>
     <div class="field"><label>Nível de acesso no app</label>
       <div class="seg" id="emAccess">
-        ${['consultor','coordenacao','logistica','admin'].map(a=>`<div class="seg-opt acc-${a}${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
+        ${['consultor','coordenacao','logistica','medica','admin'].map(a=>`<div class="seg-opt acc-${a}${u.access===a?' active':''}" data-v="${a}">${ACCESS[a].label}</div>`).join('')}
       </div>
     </div>
     <div class="field" id="emSupervisorField" style="display:none;"><label>CA responsável (opcional)</label>
@@ -1787,11 +1789,4 @@ function openEditMember(id){
   startRealtimeSync();
 })();
 
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(console.error);
-  });
-}
-</script>
-</body>
-</html>
+if ('serviceWorker' in na
