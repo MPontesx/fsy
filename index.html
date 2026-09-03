@@ -339,6 +339,7 @@ body{
 .seg-opt.acc-coordenacao.active{background:#8FC1E8;color:#12324a;}
 .seg-opt.acc-admin.active{background:var(--ink);color:#fff;}
 .seg-opt.acc-logistica.active{background:#8FDCA0;color:#1c4326;}
+.seg-opt.acc-medica.active{background:#F0A8A8;color:#5c1a1a;}
 
 .toast{
   position:fixed;bottom:90px;left:50%;transform:translateX(-50%);
@@ -404,9 +405,10 @@ const MANUAL_ROLES = ['Consultor','Coordenador','CA`S','Casal Diretor','Logísti
 // e dentro de cada grupo, ordem alfabética por nome.
 function rosterGroupRank(u){
   if(u.access==='admin') return 0;
-  if(u.access==='logistica' || u.access==='medica') return 1;
-  if(u.access==='coordenacao') return u.manualRole==='CA`S' ? 3 : 2;
-  return 4; // consultor
+  if(u.access==='logistica') return 1;
+  if(u.access==='medica') return 2;
+  if(u.access==='coordenacao') return u.manualRole==='CA`S' ? 4 : 3;
+  return 5; // consultor
 }
 function sortRoster(list){
   return list.slice().sort((a,b)=> rosterGroupRank(a)-rosterGroupRank(b) || a.name.localeCompare(b.name,'pt-BR'));
@@ -1670,6 +1672,7 @@ function openAddMember(){
         <div class="seg-opt acc-consultor active" data-v="consultor">Consultor</div>
         <div class="seg-opt acc-coordenacao" data-v="coordenacao">Coordenação</div>
         <div class="seg-opt acc-logistica" data-v="logistica">Logística</div>
+        <div class="seg-opt acc-medica" data-v="medica">Equipe Médica</div>
         <div class="seg-opt acc-admin" data-v="admin">Administrador</div>
       </div>
     </div>
