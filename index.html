@@ -440,6 +440,10 @@ function getConsultores(){ return state.roster.users.filter(u=>u.manualRole==='C
 function myConsultores(){ return getConsultores().filter(c=>c.supervisorId===state.user.id); }
 function isCA(){ return state.user && state.user.manualRole==="CA`S"; }
 function isConsultorRole(){ return state.user && state.user.manualRole==='Consultor'; }
+// Interruptor: por enquanto os consultores NÃO veem a lista de jovens.
+// Para liberar no futuro, basta trocar para true.
+const CONSULTOR_VE_JOVENS = false;
+function podeVerJovens(){ return !(isConsultorRole() && !CONSULTOR_VE_JOVENS); }
 function jovensDoConsultor(consultorId){ return state.jovens.filter(j=>j.consultorId===consultorId); }
 function cronogramaProgress(userId){
   let total=0, done=0;
@@ -716,6 +720,8 @@ const ICONS = {
 function myAccessRank(){ return state.user ? ACCESS[state.user.access].rank : 0; }
 function canManage(){ return myAccessRank() >= 2; } // coordenacao, logistica ou admin
 function isAdmin(){ return myAccessRank() >= 3; }
+// Quem pode cadastrar jovens novos: Administrador e Equipe Médica (editar/excluir continua só do admin).
+function podeCadastrarJovens(){ return isAdmin() || (state.user && state.user.access==='medica'); }
 // Chamados só aparecem pra quem tem acesso de Coordenação, Logística ou Admin
 // (Casal Diretor entra como Admin). Consultor não vê a lista — só acompanha
 // os chamados que ele mesmo registrou.
@@ -856,6 +862,7 @@ function render(){
   if(!state.user){
     content.appendChild(renderWelcome());
   } else {
+    if(!podeVerJovens() && ['meusjovens','minhaequipe','jovens'].includes(state.tab)) state.tab = 'cronograma';
     if(state.tab==='cronograma') content.appendChild(renderCronograma());
     if(state.tab==='leituras') content.appendChild(renderLeituras());
     if(state.tab==='necessidades') content.appendChild(renderNecessidades());
@@ -869,7 +876,7 @@ function render(){
       fab.onclick = openNewNeed;
       app.appendChild(fab);
     }
-    if(state.tab==='jovens' && isAdmin()){
+    if(state.tab==='jovens' && podeCadastrarJovens()){
       const fab = el('button','fab',ICONS.plus);
       fab.onclick = openAddJovem;
       app.appendChild(fab);
@@ -900,7 +907,7 @@ function render(){
     // Consultor -> só os próprios jovens; CA -> visão dos consultores que supervisiona;
     // Admin/Coordenação/Logística -> visão geral de todos os jovens (com cadastro pelo admin).
     if(isConsultorRole()){
-      tabs.push({id:'meusjovens', label:'Meus Jovens', icon:ICONS.smile});
+      if(CONSULTOR_VE_JOVENS) tabs.push({id:'meusjovens', label:'Meus Jovens', icon:ICONS.smile});
     } else if(isCA()){
       tabs.push({id:'minhaequipe', label:'Minha Equipe', icon:ICONS.shield});
     } else if(myAccessRank() >= 2){
@@ -1533,7 +1540,9 @@ function renderJovensAdmin(){
   wrap.appendChild(searchWrap);
 
   if(!isAdmin()){
-    wrap.appendChild(el('div','helptext','Você pode fazer check-in e marcar atenção especial. Apenas o administrador cadastra, edita ou exclui jovens.'));
+    wrap.appendChild(el('div','helptext', podeCadastrarJovens()
+      ? 'Você pode cadastrar jovens (botão +), fazer check-in e marcar atenção especial. Apenas o administrador edita ou exclui jovens.'
+      : 'Você pode fazer check-in e marcar atenção especial. Apenas o administrador e a equipe médica cadastram jovens; só o administrador edita ou exclui.'));
   }
 
   let list = state.jovens.slice();
