@@ -1,4 +1,4 @@
-const CACHE_NAME = "equipe-fsy-v2";
+const CACHE_NAME = "equipe-fsy-v3";
 const ASSETS = [
   "./",
   "./index.html",
