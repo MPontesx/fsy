@@ -614,6 +614,12 @@ function buildReadingPlan(){
   return plan;
 }
 const READING_PLAN = buildReadingPlan();
+// Só conta quem ainda existe na equipe: marcações de IDs antigos (de antes da restauração da
+// equipe) não pertencem a ninguém e não podem aparecer como "concluíram".
+function readersOfDay(idx){
+  const ids = new Set(state.roster.users.map(u=>u.id));
+  return ((state.readings.progress||{})[idx] || []).filter(id=>ids.has(id));
+}
 function readingProgressCount(userId){
   const progress = state.readings.progress || {};
   let count = 0;
@@ -1179,7 +1185,7 @@ function renderLeituras(){
       lastMonth = d.monthLabel;
     }
     if(!d.chapters.length) return; // dia sem leitura designada (não deve ocorrer, mas por segurança)
-    const doneUsers = (state.readings.progress && state.readings.progress[idx]) || [];
+    const doneUsers = readersOfDay(idx);
     const doneByMe = doneUsers.includes(state.user.id);
     const row = el('div','read-row'+(d.isToday?' today':'')+(d.isPast && !doneByMe?' overdue':''));
     if(d.isToday) row.id = 'read-today';
@@ -1200,7 +1206,7 @@ function renderLeituras(){
 
 async function toggleReadingDone(idx){
   if(!state.readings.progress) state.readings.progress = {};
-  const arr = state.readings.progress[idx] || [];
+  const arr = readersOfDay(idx);   // já descarta IDs antigos que não existem mais
   const i = arr.indexOf(state.user.id);
   if(i===-1) arr.push(state.user.id); else arr.splice(i,1);
   state.readings.progress[idx] = arr;
