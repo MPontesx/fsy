@@ -368,7 +368,7 @@ body{
    ============================================================ */
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-app.js";
-import { getFirestore, doc, getDoc, getDocs, setDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
+import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, doc, getDoc, getDocFromServer, getDocs, setDoc, onSnapshot, collection, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/12.15.0/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCnKe8i0aXn9ZresRun2LfqRay4TEG4szU",
@@ -379,7 +379,15 @@ const firebaseConfig = {
   appId: "1:216443030905:web:0e08e5e6514b5a6fae33a8"
 };
 const firebaseApp = initializeApp(firebaseConfig);
-const db = getFirestore(firebaseApp);
+// Cache offline: o aparelho guarda a última cópia dos dados (equipe, cronograma, jovens, chamados).
+// Sem internet o app abre com essa cópia; gravações feitas offline ficam na fila e sobem sozinhas.
+let db;
+try{
+  db = initializeFirestore(firebaseApp, {localCache: persistentLocalCache({tabManager: persistentMultipleTabManager()})});
+}catch(e){
+  console.warn('cache offline indisponivel, usando memoria:', e);
+  db = initializeFirestore(firebaseApp, {});
+}
 
 // Um documento por "gaveta" de dados, todos dentro da coleção 'fsyEquipe'.
 const rosterRef   = doc(db, 'fsyEquipe', 'roster');
@@ -614,11 +622,25 @@ function readingProgressCount(userId){
 }
 
 /* ---------------- Storage ---------------- */
+/* TRAVA DE SEGURANÇA: se a leitura de um documento falhar (rede, regras, etc.), o app NÃO pode
+   tratar isso como "vazio" e depois gravar por cima. state.ok marca o que foi lido de verdade
+   do servidor; enquanto estiver false, as gravações daquele documento são bloqueadas. */
+state.ok = {roster:false, schedule:false, readings:false};
 async function loadAll(){
   try{
+    // Tenta o servidor; sem internet, usa a cópia guardada no aparelho (se existir).
     const snap = await getDoc(rosterRef);
-    state.roster = snap.exists() ? snap.data() : {users:[]};
-  }catch(e){ state.roster = {users:[]}; }
+    if(snap.exists()){
+      state.roster = snap.data();
+      if(!Array.isArray(state.roster.users)) state.roster.users = [];
+      state.ok.roster = state.roster.users.length>0 || !snap.metadata.fromCache;
+    } else {
+      // "Não existe" só vale se veio do servidor. Vindo de cache vazio, não é confiável.
+      state.roster = {users:[]};
+      state.ok.roster = !snap.metadata.fromCache;
+    }
+    state.rosterFromCache = snap.metadata.fromCache;
+  }catch(e){ console.warn('load roster:', e); state.roster = {users:[]}; state.ok.roster = false; }
 
   try{
     const snap = await getDocs(needsCol);
@@ -629,16 +651,22 @@ async function loadAll(){
     const snap = await getDoc(scheduleRef);
     if(snap.exists()){
       state.schedule = snap.data();
-    } else {
+      state.ok.schedule = true;
+    } else if(!snap.metadata.fromCache){
       state.schedule = defaultSchedule();
       await setDoc(scheduleRef, state.schedule);
+      state.ok.schedule = true;
+    } else {
+      state.schedule = defaultSchedule();
+      state.ok.schedule = false;
     }
-  }catch(e){ state.schedule = defaultSchedule(); }
+  }catch(e){ console.warn('load schedule:', e); state.schedule = defaultSchedule(); state.ok.schedule = false; }
   try{
     const snap = await getDoc(readingsRef);
     state.readings = snap.exists() ? snap.data() : {progress:{}};
     if(!state.readings.progress) state.readings.progress = {};
-  }catch(e){ state.readings = {progress:{}}; }
+    state.ok.readings = true;
+  }catch(e){ console.warn('load readings:', e); state.readings = {progress:{}}; state.ok.readings = false; }
 
   try{
     const snap = await getDocs(jovensCol);
@@ -647,37 +675,61 @@ async function loadAll(){
 
   state.loaded = true;
 }
-async function saveRoster(){ try{ await setDoc(rosterRef, state.roster); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
-async function saveSchedule(){ try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
-async function saveReadings(){ try{ await setDoc(readingsRef, state.readings); }catch(e){ toast('Erro ao salvar. Tente novamente.'); } }
+/* Roster: antes de cada gravação (1) confere que o roster foi lido de verdade, (2) nunca grava
+   lista vazia, (3) guarda uma cópia da versão atual do servidor em 'roster_backup'.
+   Se algo der errado, a equipe pode ser recuperada desse backup no Firebase. */
+const rosterBackupRef = doc(db, 'fsyEquipe', 'roster_backup');
+async function saveRoster(){
+  if(!state.ok.roster){ toast('Equipe não carregada. Recarregue a página antes de salvar.'); return false; }
+  if(!state.roster.users || state.roster.users.length===0){ toast('Lista da equipe vazia — gravação bloqueada.'); return false; }
+  try{
+    const cur = await getDocFromServer(rosterRef);
+    if(cur.exists() && (cur.data().users||[]).length>0){
+      await setDoc(rosterBackupRef, {users: cur.data().users, savedAt: Date.now(), savedBy: (state.user && state.user.name) || ''});
+    }
+    await setDoc(rosterRef, state.roster);
+    return true;
+  }catch(e){ console.warn('save roster:', e); toast(navigator.onLine ? 'Erro ao salvar. Tente novamente.' : 'Sem internet. Alterações na equipe só são salvas online.'); return false; }
+}
+async function saveSchedule(){
+  if(!state.ok.schedule){ toast('Cronograma não carregado. Recarregue a página antes de salvar.'); return; }
+  try{ await setDoc(scheduleRef, state.schedule); }catch(e){ toast('Erro ao salvar. Tente novamente.'); }
+}
+async function saveReadings(){
+  if(!state.ok.readings){ toast('Leituras não carregadas. Recarregue a página antes de salvar.'); return; }
+  try{ await setDoc(readingsRef, state.readings); }catch(e){ toast('Erro ao salvar. Tente novamente.'); }
+}
 
 /* Chamados: cada um é um documento próprio (igual jovens), então duas pessoas
    mexendo em chamados diferentes ao mesmo tempo nunca sobrescrevem uma à outra. */
+// Offline, addDoc/updateDoc/deleteDoc só resolvem quando a internet volta. A gravação já fica
+// na fila local; então esperamos no máximo 1,5 s para a tela não travar.
+const quick = p => Promise.race([p, new Promise(r=>setTimeout(r,1500))]);
 async function addNeed(data){
-  try{ await addDoc(needsCol, data); }
+  try{ await quick(addDoc(needsCol, data)); }
   catch(e){ toast('Erro ao salvar. Tente novamente.'); }
 }
 async function updateNeed(id, fields){
-  try{ await updateDoc(doc(db,'necessidades',id), fields); }
+  try{ await quick(updateDoc(doc(db,'necessidades',id), fields)); }
   catch(e){ toast('Erro ao salvar. Tente novamente.'); }
 }
 async function deleteNeed(id){
-  try{ await deleteDoc(doc(db,'necessidades',id)); }
+  try{ await quick(deleteDoc(doc(db,'necessidades',id))); }
   catch(e){ toast('Erro ao excluir. Tente novamente.'); }
 }
 
 /* Jovens: cada um é um documento próprio (não um array gigante), então check-in
    e flag de um jovem nunca colidem com a edição de outro jovem ao mesmo tempo. */
 async function addJovem(data){
-  try{ await addDoc(jovensCol, {...data, checkedIn:false, checkedInAt:null, flagged:false, flagNote:'', createdAt:Date.now()}); }
+  try{ await quick(addDoc(jovensCol, {...data, checkedIn:false, checkedInAt:null, flagged:false, flagNote:'', createdAt:Date.now()})); }
   catch(e){ toast('Erro ao salvar. Tente novamente.'); }
 }
 async function updateJovem(id, fields){
-  try{ await updateDoc(doc(db,'jovens',id), fields); }
+  try{ await quick(updateDoc(doc(db,'jovens',id), fields)); }
   catch(e){ toast('Erro ao salvar. Tente novamente.'); }
 }
 async function deleteJovem(id){
-  try{ await deleteDoc(doc(db,'jovens',id)); }
+  try{ await quick(deleteDoc(doc(db,'jovens',id))); }
   catch(e){ toast('Erro ao excluir. Tente novamente.'); }
 }
 
@@ -685,7 +737,12 @@ async function deleteJovem(id){
    sem precisar de setInterval ficando martelando o servidor. */
 function startRealtimeSync(){
   onSnapshot(rosterRef, snap=>{
-    if(snap.exists()){ state.roster = snap.data(); render(); }
+    if(snap.exists()){
+      state.roster = snap.data();
+      if(!Array.isArray(state.roster.users)) state.roster.users = [];
+      state.ok.roster = true;
+      render();
+    }
   }, err=>console.warn('sync roster:', err));
   onSnapshot(needsCol, snap=>{
     state.needs = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
@@ -747,6 +804,14 @@ function showAccountMenu(){
   openSheet('Sua conta', body, true);
 }
 function showIdentityPicker(){
+  // Sem leitura confirmada do servidor, NUNCA oferecer "criar administrador".
+  if(!state.ok.roster){
+    const b = el('div');
+    b.innerHTML = `<div class="helptext">Não foi possível carregar a equipe agora (verifique a internet). Por segurança, nada será criado ou alterado.</div><button class="btn btn-gold btn-block" id="retryLoad">Tentar novamente</button>`;
+    openSheet('Sem conexão com a equipe', b, true);
+    $('#retryLoad').onclick = ()=>location.reload();
+    return;
+  }
   const isFirstRun = state.roster.users.length === 0;
   const body = document.createElement('div');
   if(isFirstRun){
@@ -775,8 +840,16 @@ function showIdentityPicker(){
       if(!name){ toast('Digite seu nome'); return; }
       if(!/^\d{5}$/.test(pin)){ toast('PIN deve ter 5 dígitos'); return; }
       const u = {id:uid(), name, manualRole:'Casal Diretor da Sessão', access:'admin', pin};
+      // Confirma no servidor que o roster REALMENTE continua vazio antes de criar o primeiro admin.
+      try{
+        const fresh = await getDocFromServer(rosterRef);
+        if(fresh.exists() && (fresh.data().users||[]).length>0){
+          state.roster = fresh.data(); closeSheet(); render(); toast('A equipe já existe. Escolha seu nome.'); showIdentityPicker(); return;
+        }
+      }catch(e){ toast('Sem conexão com o servidor. Tente novamente.'); return; }
       state.roster.users.push(u);
-      await saveRoster();
+      const saved = await saveRoster();
+      if(!saved){ state.roster.users = state.roster.users.filter(x=>x.id!==u.id); return; }
       selectIdentity(u);
     };
   }
