@@ -469,104 +469,143 @@ function toast(msg){
   clearTimeout(window._tt); window._tt = setTimeout(()=>t.classList.remove('show'), 2200);
 }
 
-/* ---------------- Default schedule (from Manual da Equipe FSY 2027, pgs 5-10) ---------------- */
+/* ---------------- Default schedule (from Manual da Equipe FSY 2027, pgs 9-15) ---------------- */
+/* SCHEDULE_VERSION: ao mudar este valor, o cronograma salvo no Firebase é substituído por este
+   padrão na próxima abertura do app (as marcações de "concluído" e os campos de página/quem
+   participa são mantidos nas atividades de mesmo título). */
+const SCHEDULE_VERSION = 'manual-2027-v1';
 function defaultSchedule(){
   const R = (c,ca,co,cd) => ({consultor:c, coordAssist:ca, coordenador:co, casalDiretor:cd});
-  return { days: [
+  const PSD = 'Participar, se desejar';
+  const SSD = 'Supervisionar, se designado';
+  return { version: SCHEDULE_VERSION, days: [
     { id:'d0', name:'Dia Zero', sub:'Dia antes do início da conferência', dress:'Roupa casual', activities:[
-      {time:'A definir', title:'Visita às instalações/locais', roles:R('Participar','Participar','Liderar','Participar, se desejar'), desc:'Familiarize-se com o local e as instalações para saber direcionar os participantes. Inclui áreas reservadas, alojamentos, refeitório, campos e áreas de tempo livre.'},
-      {time:'A definir', title:'Orientação para os consultores', roles:R('Participar','—','Dirigir','—'), desc:'Saiba mais sobre seu papel e responsabilidades como consultor na conferência FSY. Chegue no horário e faça anotações.'},
-      {time:'19h–20h', title:'Mensagem do casal diretor da sessão', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Reunião obrigatória para toda a equipe. Recebimento de aperfeiçoamento espiritual em preparação para a sessão. Não se atrase e faça anotações.'},
-      {time:'20h15–21h15', title:'Reuniões CA e consultores / Consultor e adjunto', roles:R('Participar','Participar','Participar','Participar'), desc:'Grupo de debate de coordenadores assistentes e consultores: fortaleça o relacionamento com sua equipe, defina expectativas e metas da semana. Planejamento e entrevistas com o(s) consultor(es) adjunto(s): apresentem-se, troquem contatos, definam local de encontro da companhia e combinem estilos de ensino.'},
-      {time:'21h20–21h50', title:'Reunião dupla de Coordenadores e Coordenadores Assistentes', roles:R('—','Participar','Dirigir','—'), desc:''}
+      {time:'A definir', title:'Visita às instalações/locais', roles:R('Participar','Participar','Participar',PSD), desc:'Familiarize-se com o local e as instalações para saber direcionar os participantes durante a sessão. Todos os membros da equipe que servem naquele local pela primeira vez devem visitar as áreas onde as atividades ocorrerão: instalações reservadas, alojamentos, refeitório, campos e áreas de tempo livre.'},
+      {time:'A definir', title:'Orientação para os consultores', roles:R('Participar','—','Dirigir','—'), desc:'Saiba mais sobre seu papel e suas responsabilidades como consultor na conferência FSY. Chegue no horário e faça anotações.'},
+      {time:'19h15–20h15', title:'Mensagem do casal diretor da sessão', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Reunião obrigatória para toda a equipe. Receba aperfeiçoamento espiritual em preparação para a sessão. Não se atrase e faça anotações.'},
+      {time:'20h30–21h30', title:'Reuniões CA e consultores / Consultor e adjunto / Casal e coordenadores', roles:R('Participar','Participar','Participar','Participar'), desc:'Três reuniões no mesmo horário. Grupo de debate de coordenadores assistentes e consultores: fortaleça o relacionamento com sua equipe, defina as expectativas e as metas da semana. Planejamento e entrevistas com o(s) consultor(es) adjunto(s): apresentem-se, troquem contatos, definam o local de encontro da companhia, conversem sobre estilos de ensino e combinem quem conduz cada atividade. Reunião do casal diretor da sessão com os coordenadores.'},
+      {time:'21h35–21h55', title:'Reunião dupla de Coordenadores e Coordenadores Assistentes', roles:R('—','Participar','Dirigir','—')}
     ]},
     { id:'d1', name:'1º Dia', sub:'Chegada e início da sessão', dress:'Camiseta da Equipe FSY', activities:[
-      {time:'7h30–8h20', title:'Desjejum da equipe', roles:R('Participar','Participar','Participar','Participar')},
+      {time:'7h–8h', title:'Desjejum da equipe', roles:R('Participar','Participar','Participar','Participar')},
       {time:'8h–8h20', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('—','Participar','Dirigir','—')},
-      {time:'8h30–9h15', title:'Reunião administrativa', roles:R('Participar','Participar','Dirigir','Compartilhar mensagem de 5 min')},
+      {time:'8h30–9h15', title:'Reunião administrativa', roles:R('Participar','Participar','Dirigir','Compartilhar mensagem de 5 min'), desc:'Última reunião da equipe antes do início da sessão. Chegue no horário e preste atenção a mudanças na agenda, informações específicas da sessão e outros avisos.'},
       {time:'9h15–10h', title:'Planejamento do consultor adjunto', roles:R('Dirigir','—','—','—')},
-      {time:'9h15–10h45', title:'Distribuição de materiais e ensaio da orientação', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar, se desejar')},
-      {time:'11h–13h', title:'Check-in', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar')},
-      {time:'13h15–14h', title:'Conheça seu consultor', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar'), desc:'Primeira vez que você se encontra com seus jovens. Você terá cerca de 1 hora para: (1) demonstrar amor e animação; (2) usar um jogo de apresentação para todos aprenderem os nomes; (3) convidar o Espírito com uma escritura e testemunho; (4) explicar as normas e o vestuário esperado; (5) perguntar como você pode ajudá-los a terem uma ótima semana. Aproveite também para dividir os jovens em 4 equipes para a atividade "O Cristo Vivo" do dia 4.'},
-      {time:'14h15–15h25', title:'Conheça sua companhia', roles:R('Dirigir','Participar, se desejar','—','Participar, se desejar'), desc:'Reúna-se com toda a companhia. Use jogos de apresentação, depois oriente a escolha do nome da companhia com base na escritura designada e conduza a elaboração de metas pessoais e da companhia para a semana.'},
+      {time:'9h15–10h45', title:'Distribuição de materiais e ensaio da orientação', roles:R('Auxiliar','Dirigir, se designado','Supervisionar',PSD), desc:'Distribuição de materiais e preparação para o check-in.'},
+      {time:'11h–13h', title:'Check-in', roles:R('Auxiliar','Dirigir, se designado','Supervisionar','Participar'), desc:'Check-in e almoço.'},
+      {time:'13h15–14h', title:'Conheça seu consultor', roles:R('Dirigir',PSD,'—',PSD), desc:'Primeira vez que você se encontra com seus jovens. Apresente-se e peça que eles se apresentem; ajude-os a entender o propósito da conferência FSY; destaque a importância das metas pessoais e da companhia; explique cada item da lista do manual do participante (Segurança nas atividades da Igreja, pulseira, respeito e responsabilidade, normas de saúde e segurança) e peça que escrevam o nome e a data no final da página. Seja líder e mentor em primeiro lugar, professor em segundo e amigo em terceiro.'},
+      {time:'14h15–15h25', title:'Conheça sua companhia', roles:R('Dirigir',PSD,'—',PSD), desc:'Reúna-se com toda a companhia no local de encontro. Use jogos de apresentação para todos se conhecerem (inclusive os jovens dos grupos dos consultores adjuntos), depois oriente a escolha do nome da companhia com base na escritura designada e conduza a elaboração de metas pessoais e da companhia para a semana.'},
       {time:'15h40–16h25', title:'Orientação', roles:R('Participar','Auxiliar','Dirigir','Auxiliar')},
-      {time:'16h30–16h50', title:'Tempo livre', roles:R('Participar','Participar','Dirigir','Participar, se desejar')},
-      {time:'17h–17h50', title:'Brincadeiras da noite familiar', roles:R('Dirigir','Participar','Participar','Participar, se desejar')},
-      {time:'18h–18h50', title:'Aula da noite familiar', roles:R('Participar','Participar','Dirigir','Ensinar')},
-      {time:'19h–20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'16h30–16h50', title:'Tempo livre', roles:R('Participar','Participar','Dirigir',PSD)},
+      {time:'17h–17h50', title:'Brincadeiras da noite no lar', roles:R('Dirigir','Participar','Participar',PSD)},
+      {time:'18h–18h50', title:'Aula da noite no lar', roles:R('Participar','Participar','Dirigir','Ensinar')},
+      {time:'19h–20h35', title:'Jantar', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir',PSD,PSD,PSD)},
       {time:'21h15–22h', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
       {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
-      {time:'22h20–22h50', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('Supervisionar','Auxiliar','Auxiliar','Participar, se desejar')},
+      {time:'22h20–22h50', title:'Reunião de coordenadores/coordenadores assistentes', roles:R('Supervisionar','Auxiliar','Auxiliar',PSD)},
       {time:'23h', title:'Staff se recolher', roles:R('—','Supervisionar','Supervisionar','Supervisionar')}
     ]},
     { id:'d2', name:'2º Dia', sub:'', dress:'Roupa de domingo', activities:[
       {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir',PSD,'—','—')},
+      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar',SSD,'Participar','Participar')},
       {time:'9h30–10h30', title:'Reunião Sacramental', roles:R('Participar','Supervisionar','Dirigir','Supervisionar')},
-      {time:'10h40–11h35', title:'Escola dominical "Vem, e segue-Me"', roles:R('Ensinar','Participar','Participar','Participar')},
-      {time:'11h45–12h45', title:'Tempo disponibilizado para o family search', roles:R('Participar','Supervisionar, se designado','Supervisionar','Ensinar')},
-      {time:'13h–14h30', title:'Almoço/ensaio do programa musical', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'14h30–15h30', title:'Compartilhar o Evangelho', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
-      {time:'15h40–16h40', title:'Tempo livre', roles:R('Participar','Participar','Participar, se desejar','Participar, se desejar')},
-      {time:'16h50–17h50', title:'Força dos jovens', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'18h–18h50', title:'Devocional com setenta/pres. de estaca', roles:R('Participar','Supervisionar, se designado','Dirigir','Participar')},
-      {time:'19h–20h30', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'20h45–21h15', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'10h40–11h30', title:'Escola dominical "Vem, e segue-Me"', roles:R('Ensinar','Participar','Participar','Participar')},
+      {time:'11h30–12h30', title:'Tempo livre', roles:R('Participar',SSD,'Supervisionar','Ensinar')},
+      {time:'12h30–14h30', title:'Almoço/ensaio do programa musical', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'14h30–15h30', title:'Compartilhar o Evangelho', roles:R('Participar','Participar',PSD,PSD)},
+      {time:'15h40–16h40', title:'Força dos jovens', roles:R('Participar','Dirigir',PSD,PSD)},
+      {time:'16h50–17h50', title:'Tempo livre', roles:R('Participar','Dirigir',PSD,PSD)},
+      {time:'18h–18h50', title:'Devocional com setenta/pres. de estaca', roles:R('Participar',SSD,'Dirigir','Participar')},
+      {time:'19h–20h30', title:'Jantar', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'20h40–21h10', title:'Refletir e analisar', roles:R('Dirigir',PSD,PSD,PSD)},
       {time:'21h20–22h', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
-      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Supervisionar','Supervisionar','—')},
+      {time:'22h10', title:'Apagar as luzes', roles:R('Supervisionar','Supervisionar','Supervisionar','Supervisionar')},
       {time:'22h20–22h50', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se quiser')},
       {time:'23h', title:'Staff deve se recolher', roles:R('Participar','Supervisionar','Supervisionar','Supervisionar')}
     ]},
     { id:'d3', name:'3º Dia', sub:'', dress:'Camiseta da Equipe FSY', activities:[
       {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h25–10h15', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'10h30–11h', title:'Preparação de faixas e gritos de guerra', roles:R('Participar','Dirigir','Ajudar, se necessário','Participar, se desejar')},
-      {time:'11h10–12h20', title:'Manhã de jogos e gritos de guerra', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'12h30–13h50', title:'Almoço / Ensaio do programa musical / Testes para o show de variedades', roles:R('Participar / Ajudar, se designado','Supervisionar, se designado','Participar','Participar, se desejar'), desc:'Três atividades ocorrendo em paralelo nesse intervalo: almoço, ensaio do programa musical e testes para o show de variedades.'},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir',PSD,'—','—')},
+      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'9h25–9h55', title:'Preparação de faixas e gritos de guerra', roles:R('Dirigir',PSD,PSD,PSD)},
+      {time:'10h10–11h20', title:'Manhã de jogos e gritos de guerra', roles:R('Participar','Dirigir','Ajudar, se necessário',PSD)},
+      {time:'11h35–12h25', title:'Estudo do "Vem, e segue-Me"', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'12h30–13h50', title:'Almoço', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'12h30–13h50', title:'Ensaio do programa musical', roles:R('Ajudar, se designado',SSD,PSD,PSD), desc:'Acontece em paralelo ao almoço e ao ensaio para o show de variedades.'},
+      {time:'12h30–13h50', title:'Ensaio para o show de variedades', roles:R('Ajudar, se designado','Participar, se designado','Ajudar, se necessário','—'), desc:'Acontece em paralelo ao almoço e ao ensaio do programa musical.'},
       {time:'14h–14h50', title:'Serão Vespertino do casal diretor — "Educação e autossuficiência"', roles:R('Participar','Participar','Dirigir','Ensinar')},
-      {time:'15h–15h50', title:'Atividade Viver o Evangelho', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'16h–16h40', title:'FSY Humano / Normas de etiqueta ao dançar (preparar-se para o baile)', roles:R('Participar / Dirigir','Ajudar, se designado','Dirigir','Participar'), desc:'Duas atividades em paralelo: "FSY Humano" e orientações de etiqueta para o baile.'},
-      {time:'18h–19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
+      {time:'15h–15h50', title:'Family Search', roles:R('Participar','Participar',PSD,PSD)},
+      {time:'16h–16h40', title:'FSY Humano', roles:R('Participar','Ajudar, se designado','Dirigir','Participar'), desc:'Os consultores seguem as instruções dos coordenadores assistentes para que a atividade ocorra de modo rápido e seguro. Ajude seus jovens a colaborarem enquanto são organizados para a foto tradicional, com as letras FSY formadas pelos participantes da sessão em uma área aberta.'},
+      {time:'16h50–17h50', title:'Orientações para o baile, preparar-se para o baile', roles:R('Dirigir','Ajudar, se designado','—','—'), desc:'Os consultores orientam os jovens sobre o baile e os ajudam a se arrumar (banho e vestuário adequado).'},
+      {time:'18h–19h', title:'Jantar', roles:R('Participar',SSD,'Participar','Participar')},
       {time:'19h–21h', title:'Baile + Lanche', roles:R('Ajudar, se designado','Ajudar, se designado','Dirigir','Participar')},
-      {time:'21h15–21h45', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
+      {time:'21h15–21h45', title:'Refletir e analisar', roles:R('Dirigir',PSD,PSD,PSD)},
       {time:'21h45–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
-      {time:'22h30', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
-      {time:'22h40–23h', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se desejar')},
-      {time:'23h', title:'Staff deve se recolher', roles:R('—','—','Supervisionar','Supervisionar')}
+      {time:'22h30', title:'Apagar as luzes', roles:R('Supervisionar','Supervisionar','Supervisionar','Supervisionar')},
+      {time:'22h40–23h', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir','Participar, se quiser')},
+      {time:'23h', title:'Staff deve se recolher', roles:R('Participar','Supervisionar','Supervisionar','Supervisionar')}
     ]},
     { id:'d4', name:'4º Dia', sub:'', dress:'Camiseta da Equipe FSY e Roupa de domingo', activities:[
       {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h25–9h45', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'10h–11h10', title:'Ensaio Geral do Show de Variedades / Tempo livre p/ os demais', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar, se desejar','—')},
-      {time:'11h20–11h40', title:'Show de variedades', roles:R('Ajudar, se designado','Supervisionar, se designado','Participar','Participar')},
-      {time:'12h50–14h', title:'Almoço', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'14h–15h', title:'Serão Vespertino do casal diretor (rapazes) / Atividade "A Família" (moças)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Atividades simultâneas e separadas por gênero: rapazes com o casal diretor, moças na atividade "A Família: Proclamação ao Mundo".'},
-      {time:'15h20–16h20', title:'Serão Vespertino do casal diretor (moças) / Atividade "A Família" (rapazes)', roles:R('Participar','Participar / Dirigir','Dirigir','Ensinar'), desc:'Inversão dos grupos do horário anterior.'},
-      {time:'15h30–17h50', title:'Tempo livre dos participantes / Ensaio Geral e final do Programa Musical', roles:R('Ajudar, se designado','Dirigir ou ajudar, se designado','Participar, se possível','Participar, se possível')},
-      {time:'18h–19h', title:'Jantar', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'19h10–20h20', title:'Programa musical e devocional do casal diretor', roles:R('Participar','Supervisionar, se designado','Dirigir','Ensinar')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir',PSD,'—','—')},
+      {time:'8h15–9h15', title:'Desjejum', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'9h25–10h', title:'Estudo do "Vem, e segue-Me"', roles:R('Dirigir',PSD,PSD,PSD)},
+      {time:'10h10–11h10', title:'Ensaio Geral do Show de Variedades / Tempo livre p/ os demais', roles:R('Ajudar, se designado',SSD,PSD,'—')},
+      {time:'11h20–12h40', title:'Show de variedades', roles:R('Ajudar, se designado',SSD,'Participar','Participar')},
+      {time:'12h50–14h', title:'Almoço', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'14h–15h', title:'Serão Vespertino do casal diretor (rapazes)', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Acontece ao mesmo tempo que a atividade "A Família: Proclamação ao Mundo" das moças.'},
+      {time:'14h–15h', title:'Atividade "A Família: Proclamação ao Mundo" (moças)', roles:R('Participar','Dirigir','—','—'), desc:'Acontece ao mesmo tempo que o serão vespertino do casal diretor com os rapazes.'},
+      {time:'15h20–16h20', title:'Serão Vespertino do casal diretor (moças)', roles:R('Participar','Participar','Dirigir','Ensinar'), desc:'Inversão dos grupos do horário anterior. Acontece ao mesmo tempo que a atividade "A Família" dos rapazes.'},
+      {time:'15h20–16h20', title:'Atividade "A Família: Proclamação ao Mundo" (rapazes)', roles:R('Participar','Dirigir','—','—'), desc:'Inversão dos grupos do horário anterior. Acontece ao mesmo tempo que o serão vespertino do casal diretor com as moças.'},
+      {time:'16h30–17h50', title:'Ensaio Geral do Programa Musical / Tempo livre p/ os demais', roles:R('Ajudar, se designado','Dirigir ou ajudar, se designado','—','—')},
+      {time:'16h30–17h50', title:'Tempo livre dos participantes', roles:R('Ajudar, se designado',SSD,'Participar, se possível',PSD)},
+      {time:'16h30–17h50', title:'Ensaio final para o programa musical', roles:R('Ajudar, se designado',SSD,PSD,PSD)},
+      {time:'18h–19h', title:'Jantar', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'19h10–20h20', title:'Programa musical e devocional do casal diretor', roles:R('Participar',SSD,'Dirigir','Ensinar')},
       {time:'20h30–21h30', title:'Convite à reverência para prestar testemunho e Reunião de testemunhos', roles:R('Dirigir','Participar, se possível','Participar, se possível','Participar, se possível')},
-      {time:'21h40–22h', title:'Refletir e analisar', roles:R('Dirigir','Participar, se desejar','Participar, se desejar','Participar, se desejar')},
-      {time:'22h–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')}
+      {time:'21h40–22h', title:'Refletir e analisar', roles:R('Dirigir',PSD,PSD,PSD)},
+      {time:'22h–22h30', title:'Contagem dos participantes, hora do silêncio etc.', roles:R('Dirigir','Receber','Receber','—')},
+      {time:'22h40', title:'Apagar as luzes', roles:R('Supervisionar','Auxiliar','Auxiliar','—')},
+      {time:'22h50–23h', title:'Reunião de coordenadores e coordenadores assistentes', roles:R('—','Participar','Dirigir',PSD)},
+      {time:'23h10', title:'Staff deve se recolher', roles:R('—','—','Supervisionar','Supervisionar')}
     ]},
     { id:'d5', name:'5º Dia', sub:'Encerramento e saída', dress:'Camiseta da Equipe FSY', activities:[
       {time:'7h45–8h', title:'Reunião de coordenadores assistentes/consultores', roles:R('Participar','Dirigir','—','—')},
-      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir','Participar, se desejar','—','—')},
-      {time:'8h20–9h20', title:'Desjejum', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'9h30–10h10', title:'Atividade "Conecte-se"', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
+      {time:'8h–8h15', title:'Devocional matutino dos participantes', roles:R('Dirigir',PSD,'—','—')},
+      {time:'8h20–9h20', title:'Desjejum', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'9h30–10h10', title:'Atividade "Conecte-se"', roles:R('Participar','Dirigir',PSD,PSD)},
       {time:'10h25–10h40', title:'Apresentação de slides', roles:R('Participar','Ajudar ou dirigir, se designado','Participar','Participar')},
-      {time:'10h40–11h40', title:'Devocional "O que vou levar para casa"', roles:R('Participar','Participar','Dirigir','Ensinar')},
-      {time:'11h15–12h30', title:'Refletir e Analisar em companhia', roles:R('Participar','Dirigir','Participar, se desejar','Participar, se desejar')},
-      {time:'12h30–13h40', title:'Almoço e arrumar as malas', roles:R('Participar','Supervisionar, se designado','Participar','Participar')},
-      {time:'13h30', title:'Saída dos participantes', roles:R('Participar','Supervisionar, se designado','Supervisionar','—')}
+      {time:'10h40–11h40', title:'Devocional "O que vou levar para casa"', roles:R('Participar','Participar',PSD,'Ensinar')},
+      {time:'11h50–12h30', title:'Refletir e analisar em companhia', roles:R('Participar','Dirigir / Supervisionar','Dirigir / Supervisionar','Participar, se quiser')},
+      {time:'12h30–13h40', title:'Almoço e arrumar as malas', roles:R('Participar',SSD,'Participar','Participar')},
+      {time:'14h–15h', title:'Saída dos participantes', roles:R('Participar',SSD,'Supervisionar','—')}
     ]}
   ]};
+}
+
+/* Troca o cronograma salvo (versão antiga) pelo padrão atual, mantendo o que as pessoas já
+   marcaram: "concluído" e os campos de página/quem participa de atividades de mesmo título. */
+function migrateSchedule(old){
+  const fresh = defaultSchedule();
+  const key = t => String(t||'').trim().toLowerCase();
+  const oldDays = {};
+  ((old && old.days) || []).forEach(d=>{
+    const pool = {};
+    (d.activities||[]).forEach(a=>{ (pool[key(a.title)] = pool[key(a.title)] || []).push(a); });
+    oldDays[d.id] = pool;
+  });
+  fresh.days.forEach(d=>{
+    const pool = oldDays[d.id] || {};
+    d.activities.forEach(a=>{
+      const match = (pool[key(a.title)] || []).shift();
+      if(!match) return;
+      if(Array.isArray(match.doneUsers) && match.doneUsers.length) a.doneUsers = match.doneUsers;
+      if(match.info && Object.values(match.info).some(v=>v)) a.info = match.info;
+    });
+  });
+  return fresh;
 }
 
 /* ---------------- Plano de leitura: Livro de Mórmon até o FSY (6 de fev) ----------------
@@ -657,7 +696,12 @@ async function loadAll(){
     const snap = await getDoc(scheduleRef);
     if(snap.exists()){
       state.schedule = snap.data();
-      state.ok.schedule = true;
+      if(state.schedule.version !== SCHEDULE_VERSION){
+        // Cronograma salvo é de uma versão antiga (ex.: manual 2026): atualiza para o manual 2027.
+        state.schedule = migrateSchedule(state.schedule);
+        if(!snap.metadata.fromCache){ await setDoc(scheduleRef, state.schedule); state.ok.schedule = true; }
+        else state.ok.schedule = false;
+      } else state.ok.schedule = true;
     } else if(!snap.metadata.fromCache){
       state.schedule = defaultSchedule();
       await setDoc(scheduleRef, state.schedule);
@@ -754,7 +798,7 @@ function startRealtimeSync(){
     state.needs = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
   }, err=>console.warn('sync needs:', err));
   onSnapshot(scheduleRef, snap=>{
-    if(snap.exists()){ state.schedule = snap.data(); render(); }
+    if(snap.exists() && snap.data().version === SCHEDULE_VERSION){ state.schedule = snap.data(); render(); }
   }, err=>console.warn('sync schedule:', err));
   onSnapshot(jovensCol, snap=>{
     state.jovens = snap.docs.map(d=>({id:d.id, ...d.data()})); render();
